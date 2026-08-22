@@ -68,6 +68,12 @@
 
 <!-- One dated line per meaningful state change, newest first. -->
 
+- 2026-08-22 — Conditional GO-day build plan written (`docs/product/02-go-day-plan.md`) from
+  the price-data research; activates only on a validation GO — gate slots stay empty until the
+  formal `/prd` → `/architecture` → `/build-plan` run. Phase 0 (zero-cost, during probe):
+  domain purchase, Best Buy API key application, Best Buy + Keepa ToS reads, LLM provider
+  decision.
+
 - 2026-08-22 — Repo created as a clone of the workflow framework; landing page moved here from
   the portfolio hub (`claude-code-ai-development-workflow`, PR #2 there now removes it and
   records the graduation). App lives at repo root; Vercel project `dropwatch` linked to this
