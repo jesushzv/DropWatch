@@ -32,7 +32,11 @@
 
 ## Probe thresholds — COMMITTED 2026-08-22 (founder approved)
 
-> Pre-committed before traffic so no result can be rationalized after the fact. Signals:
+> Pre-committed before traffic so no result can be rationalized after the fact. Read the
+> numbers on the PostHog dashboard "DropWatch Probe":
+> https://us.posthog.com/project/550322/dashboard/2021853
+>
+> Signals:
 > **interest** = visitor→signup conversion (PostHog pageviews ÷ `signup_submitted`);
 > **payment intent** = share of signups arriving through a pricing-tier button (`tier` set).
 > Free-email signups alone are NOT demand evidence — the tier split is the demand read.
