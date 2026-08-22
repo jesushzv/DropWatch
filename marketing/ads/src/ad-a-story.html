@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { width: 1080px; height: 1920px; display: grid; grid-template-rows: auto 1fr auto; padding: 140px 96px 180px; }
+  .brand { justify-content: center; }
+  .middle { display: grid; align-content: center; justify-items: center; gap: 72px; text-align: center; }
+  h1 { font-family: var(--font-heading); font-weight: 700; font-size: 92px; line-height: 1.12; text-wrap: balance; }
+  .notif { width: 100%; text-align: left; }
+  .notif__meta em { font-style: normal; color: var(--text-primary); font-weight: 600; }
+  p { font-size: 40px; color: var(--text-muted); line-height: 1.5; }
+  .cta-pill { font-size: 40px; padding: 32px 60px; }
+</style>
+</head>
+<body>
+  <div class="brand"><img src="../../../public/logo.svg" alt=""><span>DropWatch</span></div>
+  <div class="middle">
+    <h1>Stop missing price drops on things you actually want</h1>
+    <div class="notif">
+      <div class="notif__badge">PRICE DROP</div>
+      <div class="notif__title">Sony WH-1000XM5</div>
+      <div class="notif__price"><strong>$248.00</strong> at Best Buy · was $348.00 (29% off)</div>
+      <div class="notif__meta">Lowest price in 6 months. <em>Your target was $250.</em></div>
+    </div>
+    <p>Set one plain-English alert. Hear nothing until it hits.</p>
+  </div>
+  <div class="cta-pill">Get early access — 3 months of Pro free</div>
+</body>
+</html>
