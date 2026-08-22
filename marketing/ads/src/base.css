@@ -1,0 +1,122 @@
+/* Shared token sheet for ad assets — same design system as the landing page. */
+/* Fonts self-hosted from @fontsource for offline rendering. */
+@font-face {
+  font-family: "Sora";
+  font-weight: 700;
+  src: url("../../../node_modules/@fontsource/sora/files/sora-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Sora";
+  font-weight: 600;
+  src: url("../../../node_modules/@fontsource/sora/files/sora-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-weight: 400;
+  src: url("../../../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-weight: 600;
+  src: url("../../../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2");
+}
+
+:root {
+  --background: #fbfaf7;
+  --surface: #f3f0e9;
+  --border: #e3ded3;
+  --text-primary: #211d16;
+  --text-muted: #6e675b;
+  --accent: #d9480f;
+  --accent-hover: #b53b0a;
+  --text-on-accent: #ffffff;
+  --font-heading: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand img {
+  width: 56px;
+  height: 56px;
+}
+
+.brand span {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 44px;
+}
+
+.notif {
+  background: var(--background);
+  border: 2px solid var(--border);
+  border-left: 6px solid var(--accent);
+  border-radius: 16px;
+  padding: 40px 48px;
+  display: grid;
+  gap: 14px;
+}
+
+.notif__badge {
+  justify-self: start;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  border-radius: 10px;
+  padding: 8px 20px;
+}
+
+.notif__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1.2;
+}
+
+.notif__price {
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.notif__price strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.notif__meta {
+  font-size: 28px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.cta-pill {
+  justify-self: center;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: 14px;
+  padding: 26px 48px;
+  font-size: 34px;
+}
