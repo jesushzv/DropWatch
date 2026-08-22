@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <g transform="rotate(15 32 32)">
+    <path
+      fill="#D9480F"
+      fill-rule="evenodd"
+      d="M20 8 L44 8 Q50 8 50 14 L50 42 L32 58 L14 42 L14 14 Q14 8 20 8 Z
+         M32 12.5 a3.5 3.5 0 1 0 0.001 0 Z
+         M29 24 L35 24 L35 36 L41 36 L32 47 L23 36 L29 36 Z"
+    />
+    <path
+      d="M32 15.5 C 25.5 12.5 25 3 32.5 3.2 C 39.5 3.5 38.5 12.5 32 15.5"
+      stroke="#211D16"
+      stroke-width="2.5"
+      fill="none"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>
