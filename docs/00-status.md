@@ -6,16 +6,16 @@
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
 - **Last updated:** 2026-08-22
-- **Next command:** founder confirms (or edits) the probe thresholds below → merge the
-  landing-page PR → one real test signup on the live page → post the share-kit posts with
-  UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe
-  when the thresholds resolve (decide by 2026-09-12)
+- **Next command:** one real test signup on production
+  (https://dropwatch-jesushzvs-projects.vercel.app) → post the share-kit posts with UTM-tagged
+  links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when the
+  thresholds resolve (decide by 2026-09-12)
 
 ## Gate ledger
 
 | Gate | Verdict | Date | Notes |
 |---|---|---|---|
-| Validation | PENDING PROBE | 2026-08-22 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — PROPOSED, awaiting founder confirmation |
+| Validation | PENDING PROBE | 2026-08-22 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22 |
 | PRD | — | | brief covers scope; formalize with `/prd` post-GO |
 | Positioning | — | | brief covers positioning; formalize post-GO |
 | Architecture | — | | |
@@ -30,7 +30,7 @@
 | Ship | — | | |
 | Launch | — | | |
 
-## Probe thresholds — PROPOSED 2026-08-22, awaiting founder confirmation
+## Probe thresholds — COMMITTED 2026-08-22 (founder approved)
 
 > Pre-committed before traffic so no result can be rationalized after the fact. Signals:
 > **interest** = visitor→signup conversion (PostHog pageviews ÷ `signup_submitted`);
