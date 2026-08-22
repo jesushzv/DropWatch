@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { trackTierClick } from "./lib/analytics";
 import Reveal from "./components/Reveal";
 import CaptureForm from "./components/CaptureForm";
 import HeroVisual from "./components/HeroVisual";
@@ -318,7 +319,10 @@ export default function App() {
                   </ul>
                   <button
                     className={`btn ${tier.recommended ? "btn--primary" : "btn--secondary"}`}
-                    onClick={() => setTierModal(tier.name)}
+                    onClick={() => {
+                      trackTierClick(tier.name);
+                      setTierModal(tier.name);
+                    }}
                   >
                     Claim 3 months of Pro free
                   </button>

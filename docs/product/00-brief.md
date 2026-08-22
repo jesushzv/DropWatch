@@ -103,6 +103,10 @@ brief's copy layer (hero, problem, how-it-works, benefits, pricing tiers, FAQ, f
 
 ## Share kit (ready to post — swap [YOUR LINK] for the production URL)
 
+> Tag each link so PostHog attributes the channel: append `?utm_source=reddit`,
+> `?utm_source=facebook`, `?utm_source=x`, or `?utm_source=dm` respectively. Per-channel
+> conversion is read against the thresholds in `docs/00-status.md`.
+
 **Reddit, r/Frugal:** "I keep missing price drops on stuff I've decided to buy — not impulse
 stuff, things I've researched and I'm just waiting on. The drop happens midweek while I'm
 working, lasts a day, and I find out after it's back up. CamelCamelCamel helps for Amazon, but
