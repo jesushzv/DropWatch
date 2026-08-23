@@ -56,8 +56,11 @@ chars; description ≤30 chars. CTA button: **Sign up**.
 ## Campaign shape (validation-sized)
 
 - **Objective:** Traffic (link clicks). Don't use a Leads objective — the landing page IS the
-  form, and PostHog/Supabase are the source of truth, not Meta's lead metrics. No Meta Pixel
-  needed for the probe; conversion is measured on our side.
+  form, and PostHog/Supabase are the source of truth, not Meta's lead metrics.
+- **Meta Pixel:** installed (founder-directed, 2026-08-23 — supersedes this kit's original
+  "no pixel needed" call). The pixel exists to feed Meta's delivery optimization and unlock
+  retargeting later; it is NOT a probe instrument — the committed thresholds are still read
+  only from the PostHog dashboard. Setup in "Pixel setup" below.
 - **Budget:** $10/day, 7–10 days, hard cap ≈ $100. At typical $0.50–1.50 consumer CPCs that's
   ~70–200 visitors — enough to clear the 100-visitor per-channel floor alongside organic. Only
   extend past the cap if the channel is converting ≥ the iterate band (≥2%).
@@ -69,6 +72,25 @@ chars; description ≤30 chars. CTA button: **Sign up**.
   `docs/00-status.md`) — `fb-ads` / `ig-ads` appear as their own utm_source rows. Paid traffic
   converts below community traffic; judge it against the same committed thresholds but expect
   the organic channels to lead.
+
+## Pixel setup
+
+The site loads the pixel only when the `VITE_META_PIXEL_ID` env var is set at build time
+(`src/lib/metaPixel.ts`); it fires `PageView` on load and a `Lead` standard event on real
+signups (tier name attached when a tier button started the signup; honeypot submissions never
+fire it). No email or other PII is ever sent to Meta.
+
+1. **Create the pixel/dataset:** Events Manager (business.facebook.com/events_manager2) →
+   Connect data → Web → name it "DropWatch" → skip the partner-integration step (code is
+   already in the site). Copy the Dataset/Pixel ID (a ~15-digit number).
+2. **Set the env var:** Vercel → project `dropwatch` → Settings → Environment Variables →
+   add `VITE_META_PIXEL_ID` = the ID, Production only (keeps previews/dev pixel-free) →
+   redeploy production so the build picks it up.
+3. **Verify:** Events Manager → Test events → open the production URL → `PageView` appears;
+   submit a test signup → `Lead` appears. (Test signups land in Supabase — note the email
+   used so it can be discounted.) The Meta Pixel Helper browser extension works too.
+4. **Ads Manager:** keep the Traffic objective; the ad account will now also report Leads as
+   a column, but read demand only on the PostHog dashboard.
 
 ## Honest caveats
 

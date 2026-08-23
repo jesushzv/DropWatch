@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { submitLead } from "../lib/leads";
 import { trackSignup } from "../lib/analytics";
+import { trackMetaLead } from "../lib/metaPixel";
 
 const SUCCESS_COPY =
   "You're in as a founding user. When DropWatch opens for early access, you'll get one email with your invite link and your 3 free months of Pro attached — nothing else before then.";
@@ -35,6 +36,7 @@ export default function CaptureForm({ source, tier, onSuccess }: CaptureFormProp
     try {
       await submitLead({ email: email.trim(), source, tier });
       trackSignup(source, tier); // real signups only — the honeypot path above never reaches here
+      trackMetaLead(tier);
       setState("done");
       onSuccess?.();
     } catch {
