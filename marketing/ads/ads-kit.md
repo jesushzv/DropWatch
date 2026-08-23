@@ -100,7 +100,7 @@ Ordered by what blocks a launch, not by effort.
    Live as of 2026-08-23. Meta's ad review looks for these on a data-collecting landing page, and
    the site runs analytics plus the pixel.
 2. **The privacy contact actually resolves** — `privacy@usedropwatch.com` must reach a real inbox.
-   Requires the domain plus mail forwarding (Cloudflare Email Routing is free and takes ~5 min).
+   Requires the domain plus mail forwarding; see "Domain + privacy contact setup" below.
    A published contact address that bounces is the one failure worse than not publishing one.
 3. **Pixel verified receiving** — Events Manager → Test events shows `PageView` on load and `Lead`
    on a test signup. The code is confirmed in the deployed bundle; only Meta's receiving end is
@@ -108,6 +108,37 @@ Ordered by what blocks a launch, not by effort.
 4. **Facebook page filled out** — profile picture, cover, About, and 1–2 organic posts. Empty pages
    plus a new ad account is the classic rejection combination.
 5. **Destination URLs carry the paid UTMs** — never the bare URL; paid must not blend with organic.
+
+## Domain + privacy contact setup
+
+Founder decided 2026-08-23 to register `usedropwatch.com` before the ad spend, and to buy it
+directly in Vercel. Every exact-match alternative was taken — `dropwatch.com`, `.app`, `.io`,
+`.co`, `.net`, `.me`, `.xyz`, `.shop`, plus `getdropwatch.com` and `trydropwatch.com` — which is
+also why the ads kit's primary handle `@getdropwatch` has no matching domain; `@usedropwatch` now
+matches and is the better primary.
+
+**1. Attach the domain.** Vercel → project `dropwatch` → Settings → Domains → add
+`usedropwatch.com`. Registered through Vercel means DNS is Vercel-managed and configures itself;
+add `www` as a redirect to the apex if you want both.
+
+**2. Forward the privacy alias.** Use an MX-record forwarding service — ImprovMX and Forward Email
+both have free tiers and work by adding records in Vercel's DNS panel. **Do not use Cloudflare
+Email Routing here:** it requires pointing the domain's nameservers at Cloudflare, which takes DNS
+management away from Vercel for no benefit at this stage.
+
+Add the MX and SPF TXT records exactly as your chosen provider displays them (do not copy them
+from memory or from this file — providers change hostnames), pointing `privacy@usedropwatch.com`
+at the founder's personal inbox. Then **send a test email to it and confirm it arrives.** The
+address is published in the privacy policy and terms; an alias that silently bounces is worse than
+having listed a personal address.
+
+**3. Swap the URLs.** Once the domain serves the site:
+- every destination URL in this file;
+- `og:url`, `og:image`, `twitter:image` in `index.html` (currently absolute to the vercel.app host);
+- `PRODUCTION_HOSTS` in `src/lib/analytics.ts` already lists `usedropwatch.com` and
+  `www.usedropwatch.com`, so analytics starts counting the new host with no code change.
+
+Keep the vercel.app host in `PRODUCTION_HOSTS` until you are sure no traffic still lands there.
 
 ## Honest caveats
 
