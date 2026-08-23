@@ -77,6 +77,21 @@
 
 <!-- One dated line per meaningful state change, newest first. -->
 
+- 2026-08-23 — Phase 0 items 3+4 research halves done in tandem with the probe (founder asked
+  for parallel progress; probe itself untouched — PostHog shows ~13 pageviews/~5 uniques and
+  zero `signup_submitted` as of today, so the test-signup → share-kit step is still the
+  critical path). **Best Buy ToS** (`docs/product/01c-bestbuy-api-terms.md`): snippet
+  evidence shows a 72-hour caching cap purpose-scoped to display + a derivative-works
+  clause → plan price-history/deal-verdict as **Amazon-only (decision branch 1)** pending
+  the founder's support email; core Best Buy alerting buildable without stored content;
+  batch size ≈100 SKUs, rate limits a non-issue. **Keepa license**
+  (`docs/product/01d-keepa-license-findings.md`): default staleness ≤~1h, but `update=0`
+  forced refresh (~2 tokens/check, first-party-code-verified) keeps the 15-min Pro promise
+  alive with **no per-store copy split and no Rainforest fallback**; €99–170/month budget
+  holds (≈300 products ≈ €99–129); alert use strongly evidenced as intended; license
+  full-text still founder-read-at-subscription. Remaining Phase 0 founder tasks: domain →
+  business email → Best Buy key application + support email; Keepa T&C read at checkout.
+
 - 2026-08-23 — Meta Pixel installed on the landing page (founder-directed, for FB/IG ad
   delivery optimization; supersedes the ads kit's "no pixel needed" call). Loads only when
   `VITE_META_PIXEL_ID` is set in Vercel; fires PageView + Lead, no PII to Meta. Probe
