@@ -77,6 +77,12 @@
 
 <!-- One dated line per meaningful state change, newest first. -->
 
+- 2026-08-23 — Meta Pixel installed on the landing page (founder-directed, for FB/IG ad
+  delivery optimization; supersedes the ads kit's "no pixel needed" call). Loads only when
+  `VITE_META_PIXEL_ID` is set in Vercel; fires PageView + Lead, no PII to Meta. Probe
+  thresholds still read exclusively from the PostHog dashboard. Setup steps:
+  `marketing/ads/ads-kit.md` → "Pixel setup".
+
 - 2026-08-22 — Conditional GO-day build plan written (`docs/product/02-go-day-plan.md`) from
   the price-data research; activates only on a validation GO — gate slots stay empty until the
   formal `/prd` → `/architecture` → `/build-plan` run. Phase 0 (zero-cost, during probe):
