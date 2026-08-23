@@ -63,6 +63,15 @@
   system, copy, pricing — all decided) and directed a straight build of the validation landing
   page. In-repo Stage 0–2 artifacts and gates waived by founder; the landing page IS the
   Stage-1 probe. If anything conflicts with the brief, the brief wins.
+- 2026-08-22 — **Brief deviation, founder-directed:** launch-store copy softened from "At
+  launch: Amazon, Target, and Best Buy" to "Amazon and Best Buy at launch; founding users vote
+  on what comes next (Target, Walmart, and more on the ballot)". Trigger: adversary pass on
+  the GO-day plan (KS-1) — Target has no viable data source at launch economics, so the old
+  copy acquired signups on a promise the plan can't keep. This is an honesty correction made
+  before meaningful traffic (~4 founder pageviews at change time), recorded distinct from the
+  thresholds' one performance-iteration allowance, which remains unused. Candidate
+  replacement stores under research (Walmart, eBay, et al.) — outcome will land in
+  `docs/product/01b-third-store-candidates.md`.
 
 ## Log
 

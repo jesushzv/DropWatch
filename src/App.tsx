@@ -22,7 +22,7 @@ const BENEFITS = [
   {
     icon: <StorefrontsIcon />,
     title: "Watch every store at once.",
-    body: "One alert covers Amazon, Target, Best Buy, and more — no tab-hopping.",
+    body: "One alert covers Amazon, Best Buy, and more — no tab-hopping.",
   },
   {
     icon: <DipChartIcon />,
@@ -102,7 +102,7 @@ const FAQS = [
   },
   {
     q: "Which stores will it cover?",
-    a: "At launch: Amazon, Target, and Best Buy, with more added based on what founding users track. Early-access signups vote on which stores come next.",
+    a: "At launch: Amazon and Best Buy. Founding users vote on what comes next — Target, Walmart, and more are on the ballot, and early-access signups decide the order.",
   },
   {
     q: "Will you spam me?",
