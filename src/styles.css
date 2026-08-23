@@ -765,6 +765,22 @@ li {
   color: var(--text-muted);
 }
 
+.footer__legal {
+  display: flex;
+  gap: var(--s-16);
+}
+
+.footer__legal a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer__legal a:hover,
+.footer__legal a:focus-visible {
+  color: var(--accent);
+}
+
 /* --------------------------------- Motion ----------------------------------- */
 
 .reveal {

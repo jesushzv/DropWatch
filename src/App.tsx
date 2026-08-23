@@ -372,6 +372,10 @@ export default function App() {
         <div className="container footer__inner small">
           <span>© 2026 DropWatch</span>
           <span>Just for early access. No newsletters, no selling your email.</span>
+          <span className="footer__legal">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+          </span>
         </div>
       </footer>
 
