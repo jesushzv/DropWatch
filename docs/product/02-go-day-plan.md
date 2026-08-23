@@ -50,15 +50,14 @@ These have lead times or gate later phases; none of them commits to building.
 5. **Decide the LLM provider** for the parse + verdict features. The brief says Gemini; the
    framework stack and this workspace's tooling favor the Claude API. One decision line in
    `docs/knowledge/decisions.md` when made.
-6. **FOUNDER DECISION — Target launch promise (cannot wait for `/prd`).** The live FAQ
-   promises **"At launch: Amazon, Target, and Best Buy"** (and the benefits copy repeats it),
-   while this plan defers Target. Every probe signup acquired on that promise is demand
-   evidence for a 3-store product. Options: (a) edit the live copy now to "Amazon and Best
-   Buy at launch — founding users vote on what's next, Target first on the ballot" (a
-   recorded mid-probe iteration under the thresholds' iteration rule), or (b) keep the copy
-   and record a dated accepted-risk line in `docs/00-status.md` that launch may under-deliver
-   the promise. Silence is not an option — the adversary flagged the plan's earlier framing
-   of this as factually false.
+6. **RESOLVED 2026-08-22 — Target launch promise.** Founder chose to soften the copy and
+   explore a replacement third store. Live copy now reads "At launch: Amazon and Best Buy.
+   Founding users vote on what comes next — Target, Walmart, and more are on the ballot"
+   (PR #6; merge before the share kit posts). Recorded in the status ledger as a
+   founder-directed brief deviation / honesty correction, distinct from the unused
+   performance-iteration allowance. Candidate third stores (Walmart, eBay, Home Depot,
+   Costco, Newegg, B&H) under research — findings land in
+   `docs/product/01b-third-store-candidates.md` and feed `/prd`.
 
 ## Scope (from the brief, adjusted by research)
 
