@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { trackTierClick } from "./lib/analytics";
 import Reveal from "./components/Reveal";
 import CaptureForm from "./components/CaptureForm";
@@ -402,6 +403,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <SpeedInsights />
     </>
   );
 }
