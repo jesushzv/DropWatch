@@ -44,6 +44,11 @@ select email, source, tier, created_at from dropwatch_leads order by created_at 
 
 ## Deployment
 
-Vercel project `dropwatch` is linked to this repo (root directory = repo
-root). Every push gets a preview deployment; merging to `main` deploys
-production at https://dropwatch-jesushzvs-projects.vercel.app
+Two Vercel projects are linked to this repo: `drop-watch`, which serves the
+production domain https://usedropwatch.com, and the older `dropwatch`
+(https://dropwatch-jesushzvs-projects.vercel.app), kept because it is still in
+the analytics production-host allowlist. Every push gets a preview deployment on
+both; merging to `main` deploys production.
+
+Env vars are per-project and `VITE_*` vars are baked in at build time — set them
+on `drop-watch` for anything that must reach visitors of usedropwatch.com.
