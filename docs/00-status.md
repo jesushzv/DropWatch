@@ -80,6 +80,25 @@
 
 <!-- One dated line per meaningful state change, newest first. -->
 
+- 2026-08-24 — **Caught before ad spend: the custom domain was serving a pixel-less build.** A second
+  Vercel project, `drop-watch` (`prj_0tMgB16cnllifE4AfcFHqJwmGUpA`), had been created against this
+  same repo, and `usedropwatch.com` was attached to *it* rather than to `dropwatch`
+  (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`, the project named in CLAUDE.md). `VITE_META_PIXEL_ID` is set
+  only on `dropwatch`, and Vite inlines it at build time, so the same commit produced two different
+  bundles:
+
+  | Host | Project | Bundle | Meta Pixel |
+  |---|---|---|---|
+  | `dropwatch-jesushzvs-projects.vercel.app` | `dropwatch` | `index-BIVefZtg.js` | present (ID + `fbevents`) |
+  | `usedropwatch.com` | `drop-watch` | `index-DJYSEZEm.js` | **absent** |
+
+  Every ad destination URL points at `usedropwatch.com`, so had this shipped, Meta would have had no
+  PageView or Lead signal to optimise delivery against and no retargeting audience — while the
+  PostHog probe kept working normally, making the gap easy to miss. Resolution (founder decision,
+  dashboard action): move the domain onto `dropwatch` and delete `drop-watch`. Verify by re-fetching
+  the bundle from `usedropwatch.com` and grepping for the pixel ID — a green Vercel deploy is not
+  evidence.
+
 - 2026-08-24 — **Custom domain live.** `usedropwatch.com` registered and attached to the Vercel
   `dropwatch` project (founder purchased directly). Verified: apex and `www` resolve to Vercel,
   nameservers `ns1`/`ns2.vercel-dns.com`, `https://usedropwatch.com/privacy` returns 200 with

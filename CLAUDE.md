@@ -38,7 +38,11 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
   the page is a static lead-capture probe; revisit when the MVP build starts.
 - **Leads storage:** Supabase project `business-helper` (dfyoavffxzujvxvnsizi), table
   `dropwatch_leads`, insert-only RLS for anon; migration in `supabase/migrations/`.
-- **Hosting:** Vercel project `dropwatch` linked to this repo (root directory = repo root).
+- **Hosting:** Vercel project `dropwatch` (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`) linked to this repo
+  (root directory = repo root), serving `usedropwatch.com`. **This is the only project that should
+  build this repo.** `VITE_META_PIXEL_ID` is set on it and Vite inlines it at build time, so a
+  deployment from any other project silently ships a pixel-less bundle — see the 2026-08-24 entry in
+  `docs/knowledge/decisions.md`. Before trusting a production URL, check which project serves it.
 
 ## Engineering bar (proportionate to a solo shop)
 

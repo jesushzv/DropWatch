@@ -103,9 +103,19 @@ Ordered by what blocks a launch, not by effort.
    Domain done; **mail forwarding still outstanding** (no MX records as of 2026-08-24). See
    "Domain + privacy contact setup" below. A published contact address that bounces is the one
    failure worse than not publishing one.
-3. **Pixel verified receiving** — Events Manager → Test events shows `PageView` on load and `Lead`
-   on a test signup. The code is confirmed in the deployed bundle; only Meta's receiving end is
-   unverified until you look.
+3. **Pixel verified receiving on the domain the ads point at** — Events Manager → Test events shows
+   `PageView` on load and `Lead` on a test signup, opened via `https://usedropwatch.com`, not the
+   vercel.app host. On 2026-08-24 the custom domain was serving a bundle with no pixel at all,
+   because a second Vercel project without `VITE_META_PIXEL_ID` owned the domain. Confirm the pixel
+   is in the bundle the *custom domain* serves:
+
+   ```
+   curl -s https://usedropwatch.com/ | grep -o '/assets/index-[^"]*\.js'
+   curl -s https://usedropwatch.com/assets/index-XXXX.js | grep -c 1502750084950357
+   ```
+
+   A count of 1 means the pixel shipped; 0 means the wrong project is serving the domain. A green
+   Vercel deployment is not evidence either way.
 4. **Facebook page filled out** — profile picture, cover, About, and 1–2 organic posts. Empty pages
    plus a new ad account is the classic rejection combination.
 5. **Destination URLs carry the paid UTMs** — never the bare URL; paid must not blend with organic.
