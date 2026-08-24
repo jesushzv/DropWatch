@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — DropWatch</title>
+    <meta name="description" content="What DropWatch collects, why, who it shares data with, and how to get your data deleted." />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --background: #fbfaf7;
+        --surface: #f3f0e9;
+        --border: #e3ded3;
+        --text-primary: #211d16;
+        --text-muted: #6e675b;
+        --accent: #d9480f;
+        --font-heading: "Sora", ui-sans-serif, system-ui, sans-serif;
+        --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+        --radius: 8px;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        background: var(--background);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: 17px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 96px; }
+      a { color: var(--accent); }
+      .brand {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: var(--font-heading); font-weight: 700; font-size: 20px;
+        color: var(--text-primary); text-decoration: none; margin-bottom: 48px;
+      }
+      h1 { font-family: var(--font-heading); font-size: 32px; line-height: 1.25; margin-bottom: 8px; }
+      h2 { font-family: var(--font-heading); font-size: 20px; margin: 40px 0 12px; }
+      p, li { margin-bottom: 12px; }
+      ul { padding-left: 22px; }
+      .meta { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+      .lead { font-size: 18px; }
+      table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 15px; }
+      th, td { text-align: left; padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
+      th { background: var(--surface); font-weight: 600; }
+      .callout {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 16px 20px; margin: 24px 0;
+      }
+      .callout p:last-child { margin-bottom: 0; }
+      footer {
+        border-top: 1px solid var(--border); margin-top: 64px; padding-top: 24px;
+        color: var(--text-muted); font-size: 14px;
+        display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="brand" href="/">
+        <img src="/logo.svg" alt="" width="24" height="24" />
+        <span>DropWatch</span>
+      </a>
+
+      <h1>Privacy Policy</h1>
+      <p class="meta">Last updated 23 August 2026</p>
+
+      <p class="lead">
+        DropWatch is an early-stage product, operated by an independent founder. It has not launched
+        yet. Today this site does exactly two things: it takes an email address if you choose to give
+        one, and it measures whether people find the idea interesting. This page explains precisely
+        what that involves.
+      </p>
+
+      <div class="callout">
+        <p><strong>The short version.</strong> We collect your email only if you type it in. We never sell it, never rent it, and never send newsletters to it. We use analytics and an advertising pixel to count visits and signups — neither one ever receives your email address. Ask us and we will delete everything we hold about you.</p>
+      </div>
+
+      <h2>What we collect</h2>
+      <table>
+        <thead>
+          <tr><th>What</th><th>When</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Your email address, and which part of the page you signed up from (including a pricing tier name, if you clicked one)</td>
+            <td>Only when you submit the signup form</td>
+            <td>To email you once when early access opens, with your invite and your 3 free months of Pro</td>
+          </tr>
+          <tr>
+            <td>Product analytics: pages viewed, buttons clicked, signup submissions, referring site and campaign tags in the link you arrived through, browser and device type, and an approximate location derived from your IP address</td>
+            <td>Every visit</td>
+            <td>To count how many people visit and what share of them sign up — the entire point of this page right now</td>
+          </tr>
+          <tr>
+            <td>Advertising measurement: a page-view signal, and a "lead" signal when a signup happens</td>
+            <td>Every visit, if you arrived while our ads are running</td>
+            <td>To tell whether our ads reached anyone who cared. Your email address is never included</td>
+          </tr>
+          <tr>
+            <td>Standard server logs: IP address, browser user-agent, time of request</td>
+            <td>Every visit</td>
+            <td>Automatically recorded by our host to serve the page and block abuse</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        We do <strong>not</strong> record your screen or your mouse movements, we do not ask for a
+        password or payment details, and there is nothing to log into. We do not knowingly collect
+        anything from children under 13.
+      </p>
+
+      <h2>Who else touches this data</h2>
+      <p>We use a small number of outside services. Each one only receives what it needs:</p>
+      <ul>
+        <li><strong>Supabase</strong> — hosts the database holding signup emails.</li>
+        <li><strong>PostHog</strong> — product analytics. Receives page views and click events. Never receives your email address.</li>
+        <li><strong>Meta (Facebook/Instagram)</strong> — advertising measurement, via the Meta Pixel. Receives page-view and lead signals and may set cookies and link them to a Facebook or Instagram account it already recognises. Never receives your email address. You can limit this in your <a href="https://accounts.meta.com/">Meta account settings</a> or with browser tracking protection.</li>
+        <li><strong>Vercel</strong> — hosts and serves this website.</li>
+        <li><strong>Google Fonts</strong> — serves the two typefaces on this page. Loading them sends your IP address to Google.</li>
+      </ul>
+      <p>
+        We do not sell, rent, or trade your personal information, and we do not share your email
+        address with anyone. If we ever add a new service that handles your data, this page is updated
+        in the same release.
+      </p>
+
+      <h2>Cookies and similar technology</h2>
+      <p>
+        Our analytics and the Meta Pixel set cookies in your browser to avoid counting the same visitor
+        twice and to measure ad performance. Nothing on this site requires cookies to function — block
+        them and the page still works normally. Your browser's cookie settings, private-browsing mode,
+        or a tracking blocker will all limit or remove this collection.
+      </p>
+
+      <h2>How long we keep it</h2>
+      <p>
+        Signup emails are kept until DropWatch launches and you have received your invite, or until you
+        ask us to delete yours — whichever comes first. If DropWatch never launches, we delete the
+        entire signup list and will tell you we have done so. Analytics and advertising data are
+        retained on our providers' standard schedules and are not tied to your email address.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>
+        Wherever you live, you can ask us to show you what we hold about you, correct it, or delete it.
+        If you are in the UK, EU, or a US state with its own privacy law, you additionally have the
+        right to object to processing and to complain to your local data protection authority. We do
+        not charge for any of this and we will not ask you to justify the request.
+      </p>
+      <p>
+        Email <a href="mailto:privacy@usedropwatch.com">privacy@usedropwatch.com</a> and we will action
+        it within 30 days. Deleting your signup means removing your address from the database entirely —
+        it does not survive somewhere else.
+      </p>
+
+      <h2>Changes to this policy</h2>
+      <p>
+        If what we collect changes, we change this page and update the date at the top. Because
+        DropWatch is still being built, that is likely to happen at least once before launch.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions, deletion requests, or anything else about privacy:
+        <a href="mailto:privacy@usedropwatch.com">privacy@usedropwatch.com</a>.
+      </p>
+
+      <footer>
+        <span>&copy; 2026 DropWatch</span>
+        <span><a href="/">Home</a> &nbsp;·&nbsp; <a href="/terms">Terms of Service</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

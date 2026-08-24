@@ -5,11 +5,12 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-08-22
-- **Next command:** one real test signup on production
-  (https://dropwatch-jesushzvs-projects.vercel.app) → post the share-kit posts with UTM-tagged
-  links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when the
-  thresholds resolve (decide by 2026-09-12)
+- **Last updated:** 2026-08-23
+- **Next command:** clear the two pre-ads blockers (domain `usedropwatch.com` registered +
+  `privacy@usedropwatch.com` forwarding live; Meta Events Manager shows PageView + Lead) → launch
+  Meta ads per `marketing/ads/ads-kit.md` → post the share-kit posts with UTM-tagged links
+  (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when the thresholds
+  resolve (decide by 2026-09-12)
 
 ## Gate ledger
 
@@ -25,7 +26,7 @@
 | Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22 |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
-| Legal (first deploy) | — | | privacy+ToS+consent+tax, per compliance.md |
+| Legal (first deploy) | PENDING CONTACT | 2026-08-23 | Landing scope: privacy policy + terms written and footer-linked (`/privacy`, `/terms`). Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. **Blocker:** listed contact `privacy@usedropwatch.com` must resolve before ads run — a bouncing privacy contact is worse than none. |
 | Observability | — | | verified / skipped-on-record |
 | Ship | — | | |
 | Launch | — | | |
@@ -42,7 +43,9 @@
 > Free-email signups alone are NOT demand evidence — the tier split is the demand read.
 
 - **Denominator floor:** read nothing before 300 unique visitors overall; read a channel only
-  after it has 100 visitors (utm_source).
+  after it has 100 visitors (utm_source). **Count from 2026-08-23 forward** — the ~22 pageviews
+  before that date are founder QA from localhost and preview builds. Analytics is now gated to
+  production hosts, so this contamination cannot recur.
 - **GO:** ≥5% overall visitor→signup AND ≥30 total signups AND ≥20% of signups via a
   pricing-tier button. Next step: `/prd`, and a priced follow-up ("reserve your spot for $5,
   credited at launch") to founding users to convert interest into demand evidence.
@@ -77,11 +80,27 @@
 
 <!-- One dated line per meaningful state change, newest first. -->
 
+- 2026-08-23 — **Pre-ads readiness pass.** Privacy policy + terms of service published as static
+  pages (`public/privacy.html`, `public/terms.html`, served at `/privacy` and `/terms` via
+  `vercel.json` `cleanUrls`) and linked from the footer — closes the silently-skipped Legal gate,
+  which had no recorded waiver. `og:image`/`twitter:image` made absolute (relative URLs are dropped
+  by Facebook's scraper, so organic FB/IG link posts had no preview image). PostHog now initialises
+  only on production hosts, matching the Meta Pixel's env gate: localhost, Vercel previews, and QA
+  runs no longer enter the probe's denominator. Founder decisions recorded: privacy + terms (not
+  privacy alone), contact via a `usedropwatch.com` alias (not a personal Gmail), domain bought
+  before the ad spend.
+
+- 2026-08-23 — Probe instrumentation verified end-to-end on production: a signup at 20:36 UTC
+  landed in Supabase `dropwatch_leads` (source `demo`) **and** PostHog as `signup_submitted` in the
+  same second; Meta Pixel confirmed present in the deployed bundle (ID `1502750084950357`, firing
+  PageView + Lead). This closes the "one real test signup on production" step. That address is a
+  founder test — discount it from the probe count.
+
 - 2026-08-23 — Phase 0 items 3+4 research halves done in tandem with the probe (founder asked
-  for parallel progress; probe itself untouched — PostHog shows ~13 pageviews/~5 uniques and
-  zero `signup_submitted` as of today, so the test-signup → share-kit step is still the
-  critical path). **Best Buy ToS** (`docs/product/01c-bestbuy-api-terms.md`): snippet
-  evidence shows a 72-hour caching cap purpose-scoped to display + a derivative-works
+  for parallel progress; probe itself untouched — PostHog read at 20:19 UTC showed ~13
+  pageviews/~5 uniques and no `signup_submitted` yet; superseded the same evening by the
+  verified test signup logged above). **Best Buy ToS** (`docs/product/01c-bestbuy-api-terms.md`):
+  snippet evidence shows a 72-hour caching cap purpose-scoped to display + a derivative-works
   clause → plan price-history/deal-verdict as **Amazon-only (decision branch 1)** pending
   the founder's support email; core Best Buy alerting buildable without stored content;
   batch size ≈100 SKUs, rate limits a non-issue. **Keepa license**
@@ -89,8 +108,8 @@
   forced refresh (~2 tokens/check, first-party-code-verified) keeps the 15-min Pro promise
   alive with **no per-store copy split and no Rainforest fallback**; €99–170/month budget
   holds (≈300 products ≈ €99–129); alert use strongly evidenced as intended; license
-  full-text still founder-read-at-subscription. Remaining Phase 0 founder tasks: domain →
-  business email → Best Buy key application + support email; Keepa T&C read at checkout.
+  full-text still founder-read-at-subscription. Remaining Phase 0 founder tasks: Best Buy key
+  application + support email (domain now registered); Keepa T&C read at checkout.
 
 - 2026-08-23 — Meta Pixel installed on the landing page (founder-directed, for FB/IG ad
   delivery optimization; supersedes the ads kit's "no pixel needed" call). Loads only when
