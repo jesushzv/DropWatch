@@ -6,11 +6,11 @@
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
 - **Last updated:** 2026-08-24
-- **Next command:** clear the last pre-ads blocker (`privacy@usedropwatch.com` mail forwarding —
-  domain is live, MX records are not; then Meta Events Manager shows PageView + Lead) → launch
-  Meta ads per `marketing/ads/ads-kit.md` → post the share-kit posts with UTM-tagged links
-  (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when the thresholds
-  resolve (decide by 2026-09-12)
+- **Next command:** clear the last pre-ads blocker — `privacy@usedropwatch.com` mail forwarding
+  (still 0 MX records as of 2026-08-24; the pixel and domain are done and verified) → confirm
+  PageView + Lead in Meta Events Manager → launch Meta ads per `marketing/ads/ads-kit.md` → post
+  the share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) →
+  `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12)
 
 ## Gate ledger
 
@@ -79,6 +79,21 @@
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-08-24 — **Pixel confirmed live on the ad destination; duplicate project gone.** Founder moved
+  `usedropwatch.com` (and `www`) onto the `dropwatch` project and deleted `drop-watch`
+  (`prj_0tMgB16cnllifE4AfcFHqJwmGUpA` now returns 404). Verified from the bundle the live site
+  actually serves, not from a deploy status: `https://www.usedropwatch.com/` loads
+  `index-BIVefZtg.js`, which contains the pixel ID once, the `connect.facebook.net/en_US/fbevents.js`
+  loader, and the `fbq("track","Lead",{content_name})` call. The pixel-less `index-DJYSEZEm.js` is no
+  longer served anywhere.
+
+  Two notes from the move: the apex now **308-redirects to `www`**, so every ad click costs one extra
+  hop and `og:url` (the apex) no longer matches the host that serves the page — harmless for the
+  probe since both hosts are in `PRODUCTION_HOSTS`, but worth flipping to apex-served if you want
+  the canonical to match. And `usedropwatch.com` still has **0 MX and 0 TXT records**, so
+  `privacy@usedropwatch.com` — printed on the live privacy policy and terms — still bounces. That is
+  now the only item blocking the ad launch.
 
 - 2026-08-24 — **Caught before ad spend: the custom domain was serving a pixel-less build.** A second
   Vercel project, `drop-watch` (`prj_0tMgB16cnllifE4AfcFHqJwmGUpA`), had been created against this
