@@ -85,7 +85,11 @@ fire it). No email or other PII is ever sent to Meta.
    already in the site). Copy the Dataset/Pixel ID (a ~15-digit number).
 2. **Set the env var:** Vercel → project `dropwatch` → Settings → Environment Variables →
    add `VITE_META_PIXEL_ID` = the ID, Production only (keeps previews/dev pixel-free) →
-   redeploy production so the build picks it up.
+   redeploy production so the build picks it up. It is already set there.
+
+   Do **not** set it on the similarly named `drop-watch`: that duplicate project currently holds
+   `usedropwatch.com` but is being retired, and the domain moves to `dropwatch`. Configuring the
+   project that is about to be deleted is how this stayed broken in the first place.
 3. **Verify:** Events Manager → Test events → open the production URL → `PageView` appears;
    submit a test signup → `Lead` appears. (Test signups land in Supabase — note the email
    used so it can be discounted.) The Meta Pixel Helper browser extension works too.
