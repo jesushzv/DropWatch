@@ -38,7 +38,10 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
   the page is a static lead-capture probe; revisit when the MVP build starts.
 - **Leads storage:** Supabase project `business-helper` (dfyoavffxzujvxvnsizi), table
   `dropwatch_leads`, insert-only RLS for anon; migration in `supabase/migrations/`.
-- **Hosting:** Vercel project `dropwatch` linked to this repo (root directory = repo root).
+- **Hosting:** Vercel project `drop-watch` serves the production domain
+  `usedropwatch.com`; the older `dropwatch` project is also linked to this repo and still
+  counts as a production host in `src/lib/analytics.ts`. Both build from the repo root.
+  `VITE_*` env vars are build-time and per-project — set them on `drop-watch`.
 
 ## Engineering bar (proportionate to a solo shop)
 

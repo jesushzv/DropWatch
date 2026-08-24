@@ -5,8 +5,8 @@ Everything below is written to be pasted directly into Meta. Destination for eve
 the production page with the paid-channel UTM (never the bare URL — the probe reads channels
 separately, and paid must not blend with organic).
 
-- Facebook ads → `https://dropwatch-jesushzvs-projects.vercel.app?utm_source=fb-ads&utm_medium=paid&utm_campaign=validation`
-- Instagram ads → `https://dropwatch-jesushzvs-projects.vercel.app?utm_source=ig-ads&utm_medium=paid&utm_campaign=validation`
+- Facebook ads → `https://usedropwatch.com/?utm_source=fb-ads&utm_medium=paid&utm_campaign=validation`
+- Instagram ads → `https://usedropwatch.com/?utm_source=ig-ads&utm_medium=paid&utm_campaign=validation`
 - Organic page posts → `?utm_source=facebook` / `?utm_source=instagram`
 
 ## Page setup
@@ -83,7 +83,9 @@ fire it). No email or other PII is ever sent to Meta.
 1. **Create the pixel/dataset:** Events Manager (business.facebook.com/events_manager2) →
    Connect data → Web → name it "DropWatch" → skip the partner-integration step (code is
    already in the site). Copy the Dataset/Pixel ID (a ~15-digit number).
-2. **Set the env var:** Vercel → project `dropwatch` → Settings → Environment Variables →
+2. **Set the env var:** Vercel → project `drop-watch` (the project that serves
+   `usedropwatch.com` — **not** the similarly named `dropwatch`) → Settings → Environment
+   Variables →
    add `VITE_META_PIXEL_ID` = the ID, Production only (keeps previews/dev pixel-free) →
    redeploy production so the build picks it up.
 3. **Verify:** Events Manager → Test events → open the production URL → `PageView` appears;
