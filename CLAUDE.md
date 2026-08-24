@@ -38,10 +38,16 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
   the page is a static lead-capture probe; revisit when the MVP build starts.
 - **Leads storage:** Supabase project `business-helper` (dfyoavffxzujvxvnsizi), table
   `dropwatch_leads`, insert-only RLS for anon; migration in `supabase/migrations/`.
-- **Hosting:** Vercel project `drop-watch` serves the production domain
-  `usedropwatch.com`; the older `dropwatch` project is also linked to this repo and still
-  counts as a production host in `src/lib/analytics.ts`. Both build from the repo root.
-  `VITE_*` env vars are build-time and per-project — set them on `drop-watch`.
+- **Hosting:** Vercel project `dropwatch` (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`) is the **only**
+  project that should build or serve this repo (root directory = repo root). `VITE_META_PIXEL_ID`
+  is set on it, and Vite inlines `VITE_*` vars at build time, so a deployment from any other
+  project silently ships a pixel-less bundle. Before trusting a production URL, check which project
+  serves it — see the 2026-08-24 entry in `docs/knowledge/decisions.md`.
+  - **Migration in progress:** a duplicate project `drop-watch`
+    (`prj_0tMgB16cnllifE4AfcFHqJwmGUpA`) currently holds `usedropwatch.com` and builds this repo
+    too. The domain moves to `dropwatch` and `drop-watch` is deleted; until that is done, the live
+    site serves a bundle with **no Meta Pixel**. Do not add env vars or config to `drop-watch` —
+    it is being retired, not adopted.
 
 ## Engineering bar (proportionate to a solo shop)
 

@@ -44,11 +44,12 @@ select email, source, tier, created_at from dropwatch_leads order by created_at 
 
 ## Deployment
 
-Two Vercel projects are linked to this repo: `drop-watch`, which serves the
-production domain https://usedropwatch.com, and the older `dropwatch`
-(https://dropwatch-jesushzvs-projects.vercel.app), kept because it is still in
-the analytics production-host allowlist. Every push gets a preview deployment on
-both; merging to `main` deploys production.
+Vercel project `dropwatch` is linked to this repo (root directory = repo
+root). Every push gets a preview deployment; merging to `main` deploys
+production at https://usedropwatch.com
 
-Env vars are per-project and `VITE_*` vars are baked in at build time — set them
-on `drop-watch` for anything that must reach visitors of usedropwatch.com.
+A duplicate project `drop-watch` also builds this repo and currently holds the
+`usedropwatch.com` domain. It is being retired: the domain moves to `dropwatch`
+and `drop-watch` gets deleted. Until then the live site ships without the Meta
+Pixel, because `VITE_*` vars are baked in at build time and only `dropwatch`
+has `VITE_META_PIXEL_ID` set. Don't configure `drop-watch` — retire it.
