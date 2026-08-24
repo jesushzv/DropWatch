@@ -46,4 +46,4 @@ select email, source, tier, created_at from dropwatch_leads order by created_at 
 
 Vercel project `dropwatch` is linked to this repo (root directory = repo
 root). Every push gets a preview deployment; merging to `main` deploys
-production at https://dropwatch-jesushzvs-projects.vercel.app
+production at https://usedropwatch.com

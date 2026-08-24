@@ -5,8 +5,8 @@ Everything below is written to be pasted directly into Meta. Destination for eve
 the production page with the paid-channel UTM (never the bare URL — the probe reads channels
 separately, and paid must not blend with organic).
 
-- Facebook ads → `https://dropwatch-jesushzvs-projects.vercel.app?utm_source=fb-ads&utm_medium=paid&utm_campaign=validation`
-- Instagram ads → `https://dropwatch-jesushzvs-projects.vercel.app?utm_source=ig-ads&utm_medium=paid&utm_campaign=validation`
+- Facebook ads → `https://usedropwatch.com/?utm_source=fb-ads&utm_medium=paid&utm_campaign=validation`
+- Instagram ads → `https://usedropwatch.com/?utm_source=ig-ads&utm_medium=paid&utm_campaign=validation`
 - Organic page posts → `?utm_source=facebook` / `?utm_source=instagram`
 
 ## Page setup
@@ -100,8 +100,9 @@ Ordered by what blocks a launch, not by effort.
    Live as of 2026-08-23. Meta's ad review looks for these on a data-collecting landing page, and
    the site runs analytics plus the pixel.
 2. **The privacy contact actually resolves** — `privacy@usedropwatch.com` must reach a real inbox.
-   Requires the domain plus mail forwarding; see "Domain + privacy contact setup" below.
-   A published contact address that bounces is the one failure worse than not publishing one.
+   Domain done; **mail forwarding still outstanding** (no MX records as of 2026-08-24). See
+   "Domain + privacy contact setup" below. A published contact address that bounces is the one
+   failure worse than not publishing one.
 3. **Pixel verified receiving** — Events Manager → Test events shows `PageView` on load and `Lead`
    on a test signup. The code is confirmed in the deployed bundle; only Meta's receiving end is
    unverified until you look.
@@ -117,28 +118,46 @@ directly in Vercel. Every exact-match alternative was taken — `dropwatch.com`,
 also why the ads kit's primary handle `@getdropwatch` has no matching domain; `@usedropwatch` now
 matches and is the better primary.
 
-**1. Attach the domain.** Vercel → project `dropwatch` → Settings → Domains → add
-`usedropwatch.com`. Registered through Vercel means DNS is Vercel-managed and configures itself;
-add `www` as a redirect to the apex if you want both.
+**1. Attach the domain — DONE 2026-08-24.** Verified live: `usedropwatch.com` and
+`www.usedropwatch.com` both resolve to Vercel, nameservers are `ns1`/`ns2.vercel-dns.com`, and
+`https://usedropwatch.com/privacy` returns 200 with `cleanUrls` working. Note the custom domain is
+served *without* the `x-robots-tag: noindex` header the vercel.app host carries, so the page is now
+indexable by search engines — intended, but worth knowing it changed.
 
-**2. Forward the privacy alias.** Use an MX-record forwarding service — ImprovMX and Forward Email
-both have free tiers and work by adding records in Vercel's DNS panel. **Do not use Cloudflare
-Email Routing here:** it requires pointing the domain's nameservers at Cloudflare, which takes DNS
-management away from Vercel for no benefit at this stage.
+**2. Forward the privacy alias — OUTSTANDING, and the last thing blocking ads.**
+Confirmed 2026-08-24: the domain has **no MX and no TXT records at all**, so mail to
+`privacy@usedropwatch.com` currently goes nowhere. That address is published on two live pages.
 
-Add the MX and SPF TXT records exactly as your chosen provider displays them (do not copy them
-from memory or from this file — providers change hostnames), pointing `privacy@usedropwatch.com`
-at the founder's personal inbox. Then **send a test email to it and confirm it arrives.** The
-address is published in the privacy policy and terms; an alias that silently bounces is worse than
-having listed a personal address.
+Use an MX-record forwarding service — ImprovMX and Forward Email both have free tiers and work by
+adding records in Vercel's DNS panel, no nameserver change. **Do not use Cloudflare Email Routing
+here:** it requires pointing the domain's nameservers at Cloudflare, which would take DNS
+management away from Vercel for no benefit.
 
-**3. Swap the URLs.** Once the domain serves the site:
-- every destination URL in this file;
-- `og:url`, `og:image`, `twitter:image` in `index.html` (currently absolute to the vercel.app host);
-- `PRODUCTION_HOSTS` in `src/lib/analytics.ts` already lists `usedropwatch.com` and
-  `www.usedropwatch.com`, so analytics starts counting the new host with no code change.
+The flow is the same for either provider:
 
-Keep the vercel.app host in `PRODUCTION_HOSTS` until you are sure no traffic still lands there.
+1. Sign up, add `usedropwatch.com` as the domain.
+2. Create the alias `privacy@` → forward to the founder's personal inbox. A catch-all (`*@`) is
+   also fine and means a typo'd address still reaches you.
+3. The provider shows the exact MX records (two, with priorities) and one SPF TXT record. Add them
+   in Vercel → Domains → `usedropwatch.com` → DNS. **Copy them from the provider's own screen, not
+   from memory or from this file** — hostnames change and a stale record silently breaks delivery.
+4. Wait for the provider's dashboard to report the domain verified. Vercel-hosted DNS usually
+   propagates in minutes, not hours.
+
+**Then send a real test email to `privacy@usedropwatch.com` from an unrelated account and confirm
+it lands.** Do not treat a green checkmark in the provider dashboard as proof — only a received
+message is. The address is published in the privacy policy and terms; an alias that silently
+bounces is worse than having listed a personal address.
+
+Nothing needs to *send* from this address for the probe — inbound forwarding is enough. Sending as
+`privacy@usedropwatch.com` (SMTP credentials, DKIM) only matters once you email the founding-user
+list at launch.
+
+**3. Swap the URLs — DONE 2026-08-24.** Destination URLs in this file, and `og:url` /
+`og:image` / `twitter:image` in `index.html`, now point at `https://usedropwatch.com`.
+`PRODUCTION_HOSTS` in `src/lib/analytics.ts` already listed both the apex and `www`, so analytics
+counts the new host with no code change; the vercel.app host is deliberately kept in that list so
+any traffic still landing there is not silently dropped from the probe.
 
 ## Honest caveats
 
@@ -148,11 +167,6 @@ Keep the vercel.app host in `PRODUCTION_HOSTS` until you are sure no traffic sti
 - "3 months of Pro free" is a launch promise; the page's FAQ already says nothing is bought
   today, which keeps the ad claim clean. Don't add urgency/scarcity claims the product can't
   back — Meta flags them and the brief's voice forbids them anyway.
-- Landing page currently lives on a vercel.app subdomain. Ads to vercel.app URLs are allowed
-  but look less trustworthy in the ad's display link. Founder decided 2026-08-23 to register
-  `usedropwatch.com` before the ad spend; once it is live on the Vercel project, swap every
-  destination URL above, the absolute `og:image`/`twitter:image` in `index.html`, and the
-  `PRODUCTION_HOSTS` allowlist in `src/lib/analytics.ts` (the custom domain is already listed
-  there, so analytics keeps working the moment DNS resolves).
-- The vercel.app URL is served with `x-robots-tag: noindex` by Vercel, so the page is invisible to
-  search engines today. A custom domain also fixes that.
+- Resolved 2026-08-24: ads now point at `usedropwatch.com` rather than the vercel.app subdomain,
+  which reads as more trustworthy in the ad's display link and removes the `x-robots-tag: noindex`
+  that made the vercel.app host invisible to search engines.

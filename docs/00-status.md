@@ -5,9 +5,9 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-08-23
-- **Next command:** clear the two pre-ads blockers (domain `usedropwatch.com` registered +
-  `privacy@usedropwatch.com` forwarding live; Meta Events Manager shows PageView + Lead) → launch
+- **Last updated:** 2026-08-24
+- **Next command:** clear the last pre-ads blocker (`privacy@usedropwatch.com` mail forwarding —
+  domain is live, MX records are not; then Meta Events Manager shows PageView + Lead) → launch
   Meta ads per `marketing/ads/ads-kit.md` → post the share-kit posts with UTM-tagged links
   (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when the thresholds
   resolve (decide by 2026-09-12)
@@ -26,7 +26,7 @@
 | Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22 |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
-| Legal (first deploy) | PENDING CONTACT | 2026-08-23 | Landing scope: privacy policy + terms written and footer-linked (`/privacy`, `/terms`). Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. **Blocker:** listed contact `privacy@usedropwatch.com` must resolve before ads run — a bouncing privacy contact is worse than none. |
+| Legal (first deploy) | PENDING CONTACT | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. **Blocker unchanged:** `privacy@usedropwatch.com` has no MX records as of 2026-08-24, so the published contact bounces. Gate flips to PASS on a received test email, not on a provider dashboard checkmark. |
 | Observability | — | | verified / skipped-on-record |
 | Ship | — | | |
 | Launch | — | | |
@@ -79,6 +79,20 @@
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-08-24 — **Custom domain live.** `usedropwatch.com` registered and attached to the Vercel
+  `dropwatch` project (founder purchased directly). Verified: apex and `www` resolve to Vercel,
+  nameservers `ns1`/`ns2.vercel-dns.com`, `https://usedropwatch.com/privacy` returns 200 with
+  `cleanUrls` intact. Ad destination URLs and the absolute `og:url`/`og:image`/`twitter:image` now
+  point at the custom domain; `PRODUCTION_HOSTS` already covered it, and the vercel.app host stays
+  in that allowlist so stray traffic still counts. Side effect worth noting: the custom domain does
+  **not** carry the `x-robots-tag: noindex` header the vercel.app host does, so the page is now
+  indexable. Also recorded: every exact-match domain was taken (`dropwatch.com`/`.app`/`.io`/`.co`/
+  `.net`/`.me`/`.xyz`/`.shop`, `getdropwatch.com`, `trydropwatch.com`), so the ads kit's primary
+  handle `@getdropwatch` has no matching domain — `@usedropwatch` is the better primary now.
+
+  **Still blocking ads:** the domain has no MX/TXT records, so `privacy@usedropwatch.com` — published
+  on two live pages — does not receive mail. Setup steps in `marketing/ads/ads-kit.md`.
 
 - 2026-08-23 — **Pre-ads readiness pass.** Privacy policy + terms of service published as static
   pages (`public/privacy.html`, `public/terms.html`, served at `/privacy` and `/terms` via
