@@ -6,11 +6,11 @@
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
 - **Last updated:** 2026-08-24
-- **Next command:** clear the last pre-ads blocker — `privacy@usedropwatch.com` mail forwarding
-  (still 0 MX records as of 2026-08-24; the pixel and domain are done and verified) → confirm
-  PageView + Lead in Meta Events Manager → launch Meta ads per `marketing/ads/ads-kit.md` → post
-  the share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) →
-  `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12)
+- **Next command:** confirm PageView + Lead in Meta Events Manager (code and domain both verified;
+  this is the last unverified box) → fill out the Facebook page (profile, cover, About, 1-2 organic
+  posts) → launch Meta ads per `marketing/ads/ads-kit.md` → post the share-kit posts with
+  UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when
+  the thresholds resolve (decide by 2026-09-12)
 
 ## Gate ledger
 
@@ -26,7 +26,7 @@
 | Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22 |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
-| Legal (first deploy) | PENDING CONTACT | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. **Blocker unchanged:** `privacy@usedropwatch.com` has no MX records as of 2026-08-24, so the published contact bounces. Gate flips to PASS on a received test email, not on a provider dashboard checkmark. |
+| Legal (first deploy) | PASS | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. `privacy@usedropwatch.com` forwarding via ImprovMX (MX + SPF TXT confirmed live in DNS 2026-08-24); founder confirmed a test email sent from a separate account was received. |
 | Observability | — | | verified / skipped-on-record |
 | Ship | — | | |
 | Launch | — | | |
@@ -79,6 +79,13 @@
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-08-24 — **Legal gate → PASS.** `privacy@usedropwatch.com` forwarding set up via ImprovMX;
+  MX (`mx1`/`mx2.improvmx.com`) and SPF TXT records confirmed live in DNS, and founder confirmed a
+  test email sent from a separate account was received. This was the last item blocking the ad
+  launch. Everything on the pre-flight checklist in `marketing/ads/ads-kit.md` is now done except
+  the Meta Events Manager Test-events check and filling out the Facebook page — both one-time,
+  non-code steps for the founder.
 
 - 2026-08-24 — **Pixel confirmed live on the ad destination; duplicate project gone.** Founder moved
   `usedropwatch.com` (and `www`) onto the `dropwatch` project and deleted `drop-watch`
