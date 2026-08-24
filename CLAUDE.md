@@ -39,15 +39,16 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
 - **Leads storage:** Supabase project `business-helper` (dfyoavffxzujvxvnsizi), table
   `dropwatch_leads`, insert-only RLS for anon; migration in `supabase/migrations/`.
 - **Hosting:** Vercel project `dropwatch` (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`) is the **only**
-  project that should build or serve this repo (root directory = repo root). `VITE_META_PIXEL_ID`
-  is set on it, and Vite inlines `VITE_*` vars at build time, so a deployment from any other
-  project silently ships a pixel-less bundle. Before trusting a production URL, check which project
-  serves it — see the 2026-08-24 entry in `docs/knowledge/decisions.md`.
-  - **Migration in progress:** a duplicate project `drop-watch`
-    (`prj_0tMgB16cnllifE4AfcFHqJwmGUpA`) currently holds `usedropwatch.com` and builds this repo
-    too. The domain moves to `dropwatch` and `drop-watch` is deleted; until that is done, the live
-    site serves a bundle with **no Meta Pixel**. Do not add env vars or config to `drop-watch` —
-    it is being retired, not adopted.
+  project that builds or serves this repo (root directory = repo root). It holds both
+  `usedropwatch.com` and `www.usedropwatch.com`. `VITE_META_PIXEL_ID` is set on it, and Vite
+  inlines `VITE_*` vars at build time, so a deployment from any other project silently ships a
+  pixel-less bundle. **Before trusting a production URL, check which project serves it** — the
+  duplicate-project trap in the 2026-08-24 entry of `docs/knowledge/decisions.md` cost a
+  near-miss on the whole ad budget.
+- **Apex redirects to `www`:** `https://usedropwatch.com/` 308-redirects to
+  `https://www.usedropwatch.com/`. Both hosts are in `PRODUCTION_HOSTS`, so analytics fires either
+  way, but note the canonical URL in `index.html` (`og:url`) is the apex while pages are served
+  from `www`.
 
 ## Engineering bar (proportionate to a solo shop)
 

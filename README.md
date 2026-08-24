@@ -45,11 +45,11 @@ select email, source, tier, created_at from dropwatch_leads order by created_at 
 ## Deployment
 
 Vercel project `dropwatch` is linked to this repo (root directory = repo
-root). Every push gets a preview deployment; merging to `main` deploys
-production at https://usedropwatch.com
+root) and is the only project that builds it. Every push gets a preview
+deployment; merging to `main` deploys production at https://usedropwatch.com
+(the apex 308-redirects to https://www.usedropwatch.com).
 
-A duplicate project `drop-watch` also builds this repo and currently holds the
-`usedropwatch.com` domain. It is being retired: the domain moves to `dropwatch`
-and `drop-watch` gets deleted. Until then the live site ships without the Meta
-Pixel, because `VITE_*` vars are baked in at build time and only `dropwatch`
-has `VITE_META_PIXEL_ID` set. Don't configure `drop-watch` — retire it.
+`VITE_*` env vars are baked in at build time, so they must be set on
+`dropwatch` — a build from anywhere else ships without the Meta Pixel. A
+duplicate `drop-watch` project once held the domain and caused exactly that;
+it was deleted on 2026-08-24.

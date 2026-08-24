@@ -84,12 +84,9 @@ fire it). No email or other PII is ever sent to Meta.
    Connect data → Web → name it "DropWatch" → skip the partner-integration step (code is
    already in the site). Copy the Dataset/Pixel ID (a ~15-digit number).
 2. **Set the env var:** Vercel → project `dropwatch` → Settings → Environment Variables →
-   add `VITE_META_PIXEL_ID` = the ID, Production only (keeps previews/dev pixel-free) →
-   redeploy production so the build picks it up. It is already set there.
-
-   Do **not** set it on the similarly named `drop-watch`: that duplicate project currently holds
-   `usedropwatch.com` but is being retired, and the domain moves to `dropwatch`. Configuring the
-   project that is about to be deleted is how this stayed broken in the first place.
+   `VITE_META_PIXEL_ID` = the ID, Production only (keeps previews/dev pixel-free) → redeploy
+   production. Already done — `dropwatch` is now the only project building this repo, and it
+   serves `usedropwatch.com`.
 3. **Verify:** Events Manager → Test events → open the production URL → `PageView` appears;
    submit a test signup → `Lead` appears. (Test signups land in Supabase — note the email
    used so it can be discounted.) The Meta Pixel Helper browser extension works too.
@@ -107,19 +104,22 @@ Ordered by what blocks a launch, not by effort.
    Domain done; **mail forwarding still outstanding** (no MX records as of 2026-08-24). See
    "Domain + privacy contact setup" below. A published contact address that bounces is the one
    failure worse than not publishing one.
-3. **Pixel verified receiving on the domain the ads point at** — Events Manager → Test events shows
-   `PageView` on load and `Lead` on a test signup, opened via `https://usedropwatch.com`, not the
-   vercel.app host. On 2026-08-24 the custom domain was serving a bundle with no pixel at all,
-   because a second Vercel project without `VITE_META_PIXEL_ID` owned the domain. Confirm the pixel
-   is in the bundle the *custom domain* serves:
+3. **Pixel verified receiving on the domain the ads point at** — Events Manager → Test events
+   should show `PageView` on load and `Lead` on a test signup, opened via the live domain, not a
+   vercel.app host. **Still to do**; the code side is confirmed.
+
+   The bundle check below passed on 2026-08-24 (`index-BIVefZtg.js`, pixel ID present once). Re-run
+   it after any change to Vercel projects, domains, or env vars — on 2026-08-24 the domain briefly
+   sat on a second project without `VITE_META_PIXEL_ID` and served a pixel-less bundle while every
+   deployment showed green:
 
    ```
-   curl -s https://usedropwatch.com/ | grep -o '/assets/index-[^"]*\.js'
-   curl -s https://usedropwatch.com/assets/index-XXXX.js | grep -c 1502750084950357
+   curl -sL https://usedropwatch.com/ | grep -o '/assets/index-[^"]*\.js'
+   curl -sL https://www.usedropwatch.com/assets/index-XXXX.js | grep -c 1502750084950357
    ```
 
    A count of 1 means the pixel shipped; 0 means the wrong project is serving the domain. A green
-   Vercel deployment is not evidence either way.
+   Vercel deployment is not evidence either way. Note `-L`: the apex 308-redirects to `www`.
 4. **Facebook page filled out** — profile picture, cover, About, and 1–2 organic posts. Empty pages
    plus a new ad account is the classic rejection combination.
 5. **Destination URLs carry the paid UTMs** — never the bare URL; paid must not blend with organic.
@@ -132,11 +132,12 @@ directly in Vercel. Every exact-match alternative was taken — `dropwatch.com`,
 also why the ads kit's primary handle `@getdropwatch` has no matching domain; `@usedropwatch` now
 matches and is the better primary.
 
-**1. Attach the domain — DONE 2026-08-24.** Verified live: `usedropwatch.com` and
-`www.usedropwatch.com` both resolve to Vercel, nameservers are `ns1`/`ns2.vercel-dns.com`, and
-`https://usedropwatch.com/privacy` returns 200 with `cleanUrls` working. Note the custom domain is
+**1. Attach the domain — DONE 2026-08-24.** `usedropwatch.com` and `www.usedropwatch.com` are
+both on the `dropwatch` project; the duplicate `drop-watch` project is deleted. The apex
+308-redirects to `www`, so ad clicks take one extra hop and `og:url` (the apex) differs from the
+serving host — harmless for the probe, both hosts being in `PRODUCTION_HOSTS`. The custom domain is
 served *without* the `x-robots-tag: noindex` header the vercel.app host carries, so the page is now
-indexable by search engines — intended, but worth knowing it changed.
+indexable — intended, but worth knowing it changed.
 
 **2. Forward the privacy alias — OUTSTANDING, and the last thing blocking ads.**
 Confirmed 2026-08-24: the domain has **no MX and no TXT records at all**, so mail to
