@@ -1,0 +1,1 @@
+ALTER TABLE `watchedRecords` MODIFY COLUMN `sources` varchar(512) NOT NULL DEFAULT '["google_shopping"]';
