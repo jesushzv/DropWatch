@@ -129,7 +129,7 @@ export default function App() {
       <header className="nav">
         <div className="container nav__inner">
           <a href="#top" className="nav__brand">
-            <img src="/logo.svg" alt="DropWatch logo" width="24" height="24" />
+            <img src="/landing-page/logo.svg" alt="DropWatch logo" width="24" height="24" />
             <span className="nav__wordmark">DropWatch</span>
           </a>
           <nav className="nav__links" aria-label="Main">
