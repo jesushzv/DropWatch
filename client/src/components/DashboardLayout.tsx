@@ -30,6 +30,7 @@ const SIDEBAR_WIDTH_KEY = "dropwatch-sidebar-width";
 const DEFAULT_WIDTH = 248;
 const MIN_WIDTH = 220;
 const MAX_WIDTH = 360;
+const LANDING_PAGE_URL = "https://usedropwatch.com";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
@@ -52,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <h1 className="font-display text-3xl font-bold tracking-tight">One exact price. No noise.</h1>
           <p className="mt-4 text-sm leading-6 text-muted-foreground">Sign in to build your watchlist and keep a reliable record of every price you log.</p>
           <Button onClick={() => startLogin()} size="lg" className="mt-8 w-full rounded-md font-semibold">Sign in to DropWatch</Button>
+          <a href={LANDING_PAGE_URL} className="mt-4 inline-flex text-sm font-semibold text-primary underline-offset-4 hover:underline">Learn more first</a>
         </section>
       </main>
     );
@@ -124,6 +126,9 @@ function DashboardFrame({ children, setSidebarWidth }: { children: React.ReactNo
               <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
               <p className="mt-3 text-xs font-semibold">A quieter watchlist</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">You decide the product, stores, and price that matters.</p>
+              <a href={LANDING_PAGE_URL} className="mt-3 inline-flex text-xs font-semibold text-primary underline-offset-4 hover:underline group-data-[collapsible=icon]:hidden">
+                Learn more about DropWatch
+              </a>
             </div>
           </SidebarContent>
           <SidebarFooter className="border-t border-sidebar-border p-3">

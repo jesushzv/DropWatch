@@ -122,6 +122,8 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [tierModal]);
 
+  const appUrl = import.meta.env.VITE_DROPWATCH_APP_URL || "https://dropwatch-2xkgfc7i.manus.space";
+
   return (
     <>
       <header className="nav">
@@ -134,6 +136,9 @@ export default function App() {
             <a href="#how-it-works">How it works</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
+            <a href={appUrl} className="btn btn--secondary">
+              Open the app
+            </a>
             <a href="#early-access" className="btn btn--primary">
               Claim 3 months of Pro free
             </a>
