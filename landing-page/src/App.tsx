@@ -122,7 +122,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [tierModal]);
 
-  const appUrl = import.meta.env.VITE_DROPWATCH_APP_URL || "https://dropwatch-2xkgfc7i.manus.space";
+  const appUrl = "/app";
 
   return (
     <>
@@ -378,8 +378,8 @@ export default function App() {
           <span>© 2026 DropWatch</span>
           <span>Just for early access. No newsletters, no selling your email.</span>
           <span className="footer__legal">
-            <a href="/privacy">Privacy Policy</a>
-            <a href="/terms">Terms of Service</a>
+            <a href="/landing-page/privacy.html">Privacy Policy</a>
+            <a href="/landing-page/terms.html">Terms of Service</a>
           </span>
         </div>
       </footer>

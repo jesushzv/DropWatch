@@ -6,6 +6,28 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 
+function landingDistPath() {
+  return process.env.NODE_ENV === "development"
+    ? path.resolve(import.meta.dirname, "../..", "landing-page", "dist")
+    : path.resolve(import.meta.dirname, "public", "landing-page");
+}
+
+function mountLandingPage(app: Express) {
+  const distPath = landingDistPath();
+  if (!fs.existsSync(distPath)) {
+    console.warn(`Landing page build not found at ${distPath}; run the root build first.`);
+    return;
+  }
+
+  app.use("/landing-page", express.static(distPath));
+  app.get("/landing-page", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
+  app.get("/landing-page/*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
+}
+
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -20,6 +42,7 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
+  mountLandingPage(app);
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
@@ -58,6 +81,7 @@ export function serveStatic(app: Express) {
     );
   }
 
+  mountLandingPage(app);
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
