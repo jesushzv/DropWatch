@@ -122,23 +122,18 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [tierModal]);
 
-  const appUrl = "/app";
-
   return (
     <>
       <header className="nav">
         <div className="container nav__inner">
           <a href="#top" className="nav__brand">
-            <img src="/landing-page/logo.svg" alt="DropWatch logo" width="24" height="24" />
+            <img src="/logo.svg" alt="DropWatch logo" width="24" height="24" />
             <span className="nav__wordmark">DropWatch</span>
           </a>
           <nav className="nav__links" aria-label="Main">
             <a href="#how-it-works">How it works</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
-            <a href={appUrl} className="btn btn--secondary">
-              Open the app
-            </a>
             <a href="#early-access" className="btn btn--primary">
               Claim 3 months of Pro free
             </a>
@@ -378,8 +373,8 @@ export default function App() {
           <span>© 2026 DropWatch</span>
           <span>Just for early access. No newsletters, no selling your email.</span>
           <span className="footer__legal">
-            <a href="/landing-page/privacy.html">Privacy Policy</a>
-            <a href="/landing-page/terms.html">Terms of Service</a>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
           </span>
         </div>
       </footer>

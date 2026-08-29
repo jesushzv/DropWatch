@@ -30,7 +30,9 @@ const SIDEBAR_WIDTH_KEY = "dropwatch-sidebar-width";
 const DEFAULT_WIDTH = 248;
 const MIN_WIDTH = 220;
 const MAX_WIDTH = 360;
-const LANDING_PAGE_URL = "/landing-page/";
+// The marketing site is a separate deployment (see ../../README.md); point at it
+// by absolute URL rather than assuming it is mounted on this host.
+const LANDING_PAGE_URL = import.meta.env.VITE_LANDING_PAGE_URL ?? "https://www.usedropwatch.com/";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
