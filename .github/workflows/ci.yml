@@ -47,11 +47,10 @@ jobs:
           MYSQL_DATABASE: dropwatch_test
         ports:
           - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pdropwatch"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
+        # Deliberately no --health-cmd. A health check that never passes makes
+        # GitHub block on "Initialize containers" until the job timeout, with no
+        # usable log. Readiness is waited for explicitly below instead, where a
+        # failure prints why.
     env:
       DATABASE_URL: mysql://root:dropwatch@127.0.0.1:3306/dropwatch_test
     defaults:
@@ -72,6 +71,32 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm run check
+      - name: Wait for MySQL
+        # Uses mysql2, already a dependency, so this proves a real protocol-level
+        # connection and that the database exists — not merely an open port.
+        run: |
+          node -e '
+            const mysql = require("mysql2/promise");
+            const deadline = Date.now() + 90_000;
+            (async () => {
+              for (;;) {
+                try {
+                  const c = await mysql.createConnection(process.env.DATABASE_URL);
+                  await c.query("SELECT 1");
+                  await c.end();
+                  console.log("MySQL ready");
+                  return;
+                } catch (error) {
+                  if (Date.now() > deadline) {
+                    console.error("MySQL never became ready:", error.message);
+                    process.exit(1);
+                  }
+                  await new Promise(r => setTimeout(r, 2000));
+                }
+              }
+            })();
+          '
+
       - name: Apply migrations to the test database
         # migrate only — `generate` would author a new migration from the schema.
         run: pnpm exec drizzle-kit migrate
