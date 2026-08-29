@@ -37,6 +37,22 @@ jobs:
     name: Application
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # The integration suites skip themselves without DATABASE_URL, so without a
+    # database they were dead weight in CI. This runs them for real.
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: dropwatch
+          MYSQL_DATABASE: dropwatch_test
+        ports:
+          - 3306:3306
+        # Deliberately no --health-cmd. A health check that never passes makes
+        # GitHub block on "Initialize containers" until the job timeout, with no
+        # usable log. Readiness is waited for explicitly below instead, where a
+        # failure prints why.
+    env:
+      DATABASE_URL: mysql://root:dropwatch@127.0.0.1:3306/dropwatch_test
     defaults:
       run:
         working-directory: app
@@ -55,16 +71,49 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm run check
+      - name: Wait for MySQL
+        # Uses mysql2, already a dependency, so this proves a real protocol-level
+        # connection and that the database exists — not merely an open port.
+        run: |
+          node -e '
+            const mysql = require("mysql2/promise");
+            const deadline = Date.now() + 90_000;
+            (async () => {
+              for (;;) {
+                try {
+                  const c = await mysql.createConnection(process.env.DATABASE_URL);
+                  await c.query("SELECT 1");
+                  await c.end();
+                  console.log("MySQL ready");
+                  return;
+                } catch (error) {
+                  if (Date.now() > deadline) {
+                    console.error("MySQL never became ready:", error.message);
+                    process.exit(1);
+                  }
+                  await new Promise(r => setTimeout(r, 2000));
+                }
+              }
+            })();
+          '
+
+      - name: Apply migrations to the test database
+        # migrate only — `generate` would author a new migration from the schema.
+        run: pnpm exec drizzle-kit migrate
 
       - name: Test
-        # KNOWN GAP: no DATABASE_URL, so the six integration suites (9 tests)
-        # skip rather than run. A MySQL service container was attempted twice
-        # and both times the job hung on "Initialize containers" past the
-        # timeout, with the landing-page job on the same run finishing in 20s —
-        # service containers do not start in this environment. Revisit with
-        # ADR-2 (Supabase Postgres), where the database is managed rather than
-        # a sidecar. Everything else must pass with no ambient credentials.
-        run: pnpm test
+        # DATABASE_URL is set above, so the integration suites run rather than
+        # skip. No other credentials are provided: everything else must pass
+        # without them. The suites skip themselves when DATABASE_URL is absent,
+        # which would let a broken database look like a green build — so a
+        # skipped integration suite fails the job.
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee /tmp/test.log
+          if grep -qE "^ *↓ .*integration" /tmp/test.log; then
+            echo "::error::integration suites skipped despite DATABASE_URL being set" >&2
+            exit 1
+          fi
       - name: Build
         run: pnpm run build
       - name: Assert build-time instrumentation stays out of the bundle
