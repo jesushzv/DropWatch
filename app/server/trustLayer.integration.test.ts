@@ -54,7 +54,6 @@ integration("persisted trust layer", () => {
     expect(staleDetail?.prices).toHaveLength(0);
     await database.delete(users).where(eq(users.id, pipelineUserId));
   });
-});
 
   it("applies item, estimated, and verified alert bases differently for partial landed cost", async () => {
     const database = await getDb();
@@ -101,3 +100,4 @@ integration("persisted trust layer", () => {
     }
     await database.delete(users).where(eq(users.id, completeUserId));
   });
+});

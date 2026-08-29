@@ -2,11 +2,18 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { sendThresholdEmail } from "./notifications";
 
 describe("threshold email notifications", () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
 
   it("sends the configured sender and a concise target-met message through Postmark", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ MessageID: "message-123" }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
+    // Postmark rejects a literal \u003c…\u003e sender, so the display-name form
+    // is unescaped on the way out. Set it here rather than depending on
+    // whatever POSTMARK_FROM_EMAIL the machine happens to export.
+    vi.stubEnv("POSTMARK_FROM_EMAIL", "DropWatch \\u003cnotifications@usedropwatch.com\\u003e");
 
     const result = await sendThresholdEmail({
       recipient: "member@example.com",
