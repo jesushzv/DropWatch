@@ -12,6 +12,7 @@ import { sdk } from "./sdk";
 import * as db from "../db";
 import { isValidPriceWebhookSignature, processPriceApiWebhook, requestPriceImports } from "../priceImport";
 import { serveStatic, setupVite } from "./vite";
+import { assertRequiredEnv } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -33,6 +34,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  assertRequiredEnv();
   const app = express();
   const server = createServer(app);
   app.set("trust proxy", 1);
@@ -43,7 +45,12 @@ async function startServer() {
   registerOAuthRoutes(app);
   registerTestAuthRoute(app, { upsertUser: db.upsertUser, createSessionToken: sdk.createSessionToken.bind(sdk) });
   app.post("/api/webhooks/price-api", async (req, res) => {
-    if (!isValidPriceWebhookSignature(typeof req.query.signature === "string" ? req.query.signature : undefined)) {
+    if (
+      !isValidPriceWebhookSignature(
+        typeof req.query.signature === "string" ? req.query.signature : undefined,
+        typeof req.query.expires === "string" ? req.query.expires : undefined,
+      )
+    ) {
       return res.status(401).json({ error: "invalid webhook signature" });
     }
     try {
@@ -53,9 +60,32 @@ async function startServer() {
       return res.status(500).json({ error: error instanceof Error ? error.message : "Price API webhook processing failed." });
     }
   });
-  app.get("/api/unsubscribe", async (req, res) => {
-    const token = typeof req.query.token === "string" ? req.query.token : "";
-    if (!token || token.length > 64) return res.status(400).type("html").send("<h1>Invalid unsubscribe link</h1><p>This link is incomplete or expired.</p>");
+  // GET only confirms; the change happens on POST. A GET that mutates would be
+  // fired by mail-client link scanners and prefetchers, silently switching off
+  // users' alerts without them ever clicking.
+  const unsubscribeToken = (req: express.Request) => {
+    const raw = typeof req.query.token === "string" ? req.query.token : typeof req.body?.token === "string" ? req.body.token : "";
+    return raw.length > 0 && raw.length <= 64 ? raw : "";
+  };
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, character =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] as string);
+
+  app.get("/api/unsubscribe", (req, res) => {
+    const token = unsubscribeToken(req);
+    if (!token) return res.status(400).type("html").send("<h1>Invalid unsubscribe link</h1><p>This link is incomplete or expired.</p>");
+    return res.status(200).type("html").send(
+      `<h1>Turn off price-alert emails?</h1>
+       <p>DropWatch will still keep your watch history and in-app target events.</p>
+       <form method="POST" action="/api/unsubscribe">
+         <input type="hidden" name="token" value="${escapeHtml(token)}" />
+         <button type="submit">Turn off price-alert emails</button>
+       </form>`,
+    );
+  });
+
+  app.post("/api/unsubscribe", async (req, res) => {
+    const token = unsubscribeToken(req);
+    if (!token) return res.status(400).type("html").send("<h1>Invalid unsubscribe link</h1><p>This link is incomplete or expired.</p>");
     try {
       const changed = await db.unsubscribePriceAlertEmails(token);
       return res.status(changed ? 200 : 404).type("html").send(changed

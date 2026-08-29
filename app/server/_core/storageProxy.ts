@@ -1,11 +1,29 @@
 import type { Express } from "express";
 import { ENV } from "./env";
+import { sdk } from "./sdk";
 
 export function registerStorageProxy(app: Express) {
   app.get("/manus-storage/*", async (req, res) => {
+    // This endpoint mints presigned URLs for arbitrary object-storage paths.
+    // Without an authentication check anyone on the internet could read any
+    // key they could name or guess.
+    try {
+      await sdk.authenticateRequest(req);
+    } catch {
+      res.status(401).send("Authentication required");
+      return;
+    }
+
     const key = (req.params as Record<string, string>)[0];
     if (!key) {
       res.status(400).send("Missing storage key");
+      return;
+    }
+
+    // Keep the caller inside the storage namespace: reject traversal and
+    // absolute keys before handing the path to the storage backend.
+    if (key.includes("..") || key.startsWith("/")) {
+      res.status(400).send("Invalid storage key");
       return;
     }
 

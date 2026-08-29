@@ -18,7 +18,7 @@ vi.mock("./watchAi", () => ({ writeDealVerdict: vi.fn() }));
 import * as db from "./db";
 import { sendThresholdEmail } from "./notifications";
 import { writeDealVerdict } from "./watchAi";
-import { findLowestTrustedOffer, isValidPriceWebhookSignature, priceWebhookSignature, processPriceApiWebhook, requestPriceImports } from "./priceImport";
+import { buildPriceWebhookUrl, findLowestTrustedOffer, isValidPriceWebhookSignature, priceWebhookSignature, processPriceApiWebhook, requestPriceImports } from "./priceImport";
 
 describe("Price API import helpers", () => {
   afterEach(() => {
@@ -46,8 +46,31 @@ describe("Price API import helpers", () => {
   });
 
   it("requires a valid signed callback URL before accepting a provider webhook", () => {
-    expect(isValidPriceWebhookSignature(priceWebhookSignature())).toBe(true);
-    expect(isValidPriceWebhookSignature("invalid-signature")).toBe(false);
+    const expires = Math.floor(Date.now() / 1000) + 3600;
+    expect(isValidPriceWebhookSignature(priceWebhookSignature(expires), String(expires))).toBe(true);
+    expect(isValidPriceWebhookSignature("invalid-signature", String(expires))).toBe(false);
+    expect(isValidPriceWebhookSignature(priceWebhookSignature(expires), undefined)).toBe(false);
+  });
+
+  it("rejects a callback signature once it has expired", () => {
+    const expires = Math.floor(Date.now() / 1000) + 3600;
+    const signature = priceWebhookSignature(expires);
+    expect(isValidPriceWebhookSignature(signature, String(expires))).toBe(true);
+    // One second past the stamped expiry the same URL stops working, so a
+    // callback URL captured from provider or proxy logs does not last forever.
+    expect(isValidPriceWebhookSignature(signature, String(expires), (expires + 1) * 1000)).toBe(false);
+  });
+
+  it("will not accept a signature bound to a different expiry", () => {
+    const expires = Math.floor(Date.now() / 1000) + 3600;
+    expect(isValidPriceWebhookSignature(priceWebhookSignature(expires), String(expires + 60))).toBe(false);
+  });
+
+  it("stamps the callback URL it hands the provider with a matching expiry", () => {
+    const url = new URL(buildPriceWebhookUrl("https://app.example"));
+    const expires = url.searchParams.get("expires");
+    const signature = url.searchParams.get("signature");
+    expect(isValidPriceWebhookSignature(signature ?? undefined, expires ?? undefined)).toBe(true);
   });
 
   it("chooses the lowest offer across supported retailers when no store list is supplied", () => {

@@ -4,8 +4,18 @@ export const TEST_AUTH_OPEN_ID = "dropwatch-dev-test-user";
 export const TEST_AUTH_NAME = "DropWatch Development Tester";
 export const TEST_AUTH_EMAIL = "dropwatch-dev-test@example.invalid";
 
+/** The only environments where development-only auth may exist at all. */
+const TEST_AUTH_ALLOWED_ENVS = new Set(["development", "test"]);
+
 export function isTestAuthEnabled(env: NodeJS.ProcessEnv = process.env) {
-  return env.NODE_ENV !== "production" && env.DROPWATCH_TEST_AUTH_ENABLED === "true" && Boolean(env.DROPWATCH_TEST_AUTH_SECRET);
+  // Allowlist rather than `NODE_ENV !== "production"`: an unset NODE_ENV would
+  // pass that negation while ENV.isProduction already treats it as production,
+  // so a deployment that simply forgot to set NODE_ENV could enable this route.
+  return (
+    TEST_AUTH_ALLOWED_ENVS.has(env.NODE_ENV ?? "") &&
+    env.DROPWATCH_TEST_AUTH_ENABLED === "true" &&
+    Boolean(env.DROPWATCH_TEST_AUTH_SECRET)
+  );
 }
 
 export function hasValidTestAuthSecret(candidate: string | undefined, env: NodeJS.ProcessEnv = process.env) {

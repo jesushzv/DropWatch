@@ -78,21 +78,36 @@ export function findLowestNormalizedOffer(result: unknown, trustedStores: string
   return candidates.sort((left, right) => left.estimatedTotalCents - right.estimatedTotalCents)[0];
 }
 
-export function priceWebhookSignature() {
-  return createHmac("sha256", ENV.cookieSecret).update("dropwatch-priceapi-webhook-v1").digest("hex");
+/**
+ * Callback URLs handed to the price provider carry an expiring signature rather
+ * than one constant token. The provider echoes the whole URL back, so the token
+ * is exposed in their logs and in every proxy between us; binding it to an
+ * expiry means a captured URL stops working instead of granting the ability to
+ * force job processing forever.
+ */
+export const PRICE_WEBHOOK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function priceWebhookSignature(expiresAtSeconds: number) {
+  return createHmac("sha256", ENV.cookieSecret).update(`dropwatch-priceapi-webhook-v2:${expiresAtSeconds}`).digest("hex");
 }
 
-export function isValidPriceWebhookSignature(candidate: string | undefined) {
+export function isValidPriceWebhookSignature(candidate: string | undefined, expiresAt?: string | undefined, now: number = Date.now()) {
   if (!candidate || !ENV.cookieSecret) return false;
-  const expected = priceWebhookSignature();
+
+  const expiresAtSeconds = Number(expiresAt);
+  if (!Number.isSafeInteger(expiresAtSeconds) || expiresAtSeconds <= 0) return false;
+  if (expiresAtSeconds * 1000 <= now) return false;
+
+  const expectedBuffer = Buffer.from(priceWebhookSignature(expiresAtSeconds));
   const candidateBuffer = Buffer.from(candidate);
-  const expectedBuffer = Buffer.from(expected);
   return candidateBuffer.length === expectedBuffer.length && timingSafeEqual(candidateBuffer, expectedBuffer);
 }
 
-export function buildPriceWebhookUrl(publicBaseUrl: string) {
+export function buildPriceWebhookUrl(publicBaseUrl: string, now: number = Date.now()) {
+  const expiresAtSeconds = Math.floor((now + PRICE_WEBHOOK_TTL_MS) / 1000);
   const url = new URL("/api/webhooks/price-api", publicBaseUrl);
-  url.searchParams.set("signature", priceWebhookSignature());
+  url.searchParams.set("expires", String(expiresAtSeconds));
+  url.searchParams.set("signature", priceWebhookSignature(expiresAtSeconds));
   return url.toString();
 }
 

@@ -58,6 +58,16 @@ export async function sendThresholdEmail(input: ThresholdEmail): Promise<Notific
         Subject: `Price target met: ${input.productName}`,
         TextBody: `${input.productName} is ${price} at ${input.store}, which meets your ${target} target in DropWatch.\n\n${evidence}${input.productUrl ? `\n\nView offer: ${input.productUrl}` : ""}${input.unsubscribeUrl ? `\n\nManage price-alert emails: ${input.unsubscribeUrl}` : ""}`,
         HtmlBody: `<p><strong>${product}</strong> is now <strong>${price}</strong> at ${store}.</p><p>That meets your DropWatch target of <strong>${target}</strong>.</p><dl style="font-size:14px;line-height:1.6"><dt>Estimated delivered total</dt><dd>${escapeHtml(total ?? "Not available")}</dd><dt>Shipping</dt><dd>${escapeHtml(shipping)}</dd><dt>Tax</dt><dd>${escapeHtml(tax)}</dd><dt>Condition</dt><dd>${escapeHtml(input.condition ?? "Unknown")}</dd><dt>Availability</dt><dd>${escapeHtml(input.availability ?? "Unknown")}</dd><dt>Alert basis</dt><dd>${escapeHtml(input.alertBasis ?? "item_price")}</dd></dl>${input.productUrl ? `<p><a href="${escapeHtml(input.productUrl)}">View offer</a></p>` : ""}${unsubscribeUrl ? `<p style="margin-top:24px;font-size:12px;color:#6b7280">No longer want price-alert emails? <a href="${unsubscribeUrl}">Unsubscribe</a>.</p>` : ""}`,
+        // RFC 8058 one-click: mail clients POST here, so the unsubscribe stays a
+        // single click without a GET that scanners can trip.
+        ...(input.unsubscribeUrl
+          ? {
+              Headers: [
+                { Name: "List-Unsubscribe", Value: `<${input.unsubscribeUrl}>` },
+                { Name: "List-Unsubscribe-Post", Value: "List-Unsubscribe=One-Click" },
+              ],
+            }
+          : {}),
         Tag: "dropwatch-threshold-alert",
         Metadata: { product: input.productName.slice(0, 250), store: input.store.slice(0, 120) },
         MessageStream: "outbound",

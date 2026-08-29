@@ -220,6 +220,14 @@ class SDKServer {
         return null;
       }
 
+      // The signing secret may be shared with sibling apps on the same auth
+      // server, so a valid signature alone does not mean the token was issued
+      // for us.
+      if (appId !== ENV.appId) {
+        console.warn("[Auth] Session issued for a different app");
+        return null;
+      }
+
       return {
         openId,
         appId,
