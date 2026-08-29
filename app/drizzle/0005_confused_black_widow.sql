@@ -1,0 +1,2 @@
+ALTER TABLE `notificationPreferences` ADD `unsubscribeToken` varchar(64);--> statement-breakpoint
+ALTER TABLE `notificationPreferences` ADD CONSTRAINT `notificationPreferences_unsubscribeToken_unique` UNIQUE(`unsubscribeToken`);
