@@ -150,10 +150,16 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
-
-export default defineConfig({
-  plugins,
+export default defineConfig(({ command }) => ({
+  // jsxLocPlugin, the Manus runtime, and the debug collector are authoring-time
+  // instrumentation. Left enabled for `vite build`, the runtime alone inlined
+  // ~367 kB into dist/public/index.html — an uncacheable duplicate of the
+  // framework on every page load, on top of the main bundle.
+  plugins: [
+    react(),
+    tailwindcss(),
+    ...(command === "build" ? [] : [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()]),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -184,4 +190,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# The landing page and the app are independent builds with different package
+# managers, so they run as separate jobs rather than one combined install.
+jobs:
+  landing-page:
+    name: Landing page
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build
+        run: npm run build
+      - name: Assert the landing bundle is served from the site root
+        # The Vercel project that serves usedropwatch.com builds this root, so a
+        # non-root base would break every live ad and share-kit link.
+        run: |
+          grep -q 'src="/assets/' dist/index.html
+          grep -q 'href="/assets/' dist/index.html
+
+  app:
+    name: Application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm run check
+      - name: Test
+        # No DATABASE_URL, so the integration suites skip themselves. Everything
+        # else must pass without any ambient credentials.
+        run: pnpm test
+      - name: Build
+        run: pnpm run build
+      - name: Assert build-time instrumentation stays out of the bundle
+        # The Manus runtime previously inlined ~367 kB into the production HTML.
+        run: |
+          if grep -q 'manus-runtime' dist/public/index.html; then
+            echo "manus-runtime was inlined into the production build" >&2
+            exit 1
+          fi
