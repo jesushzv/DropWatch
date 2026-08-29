@@ -101,7 +101,6 @@ describe("watchedRecords router", () => {
 
     expect(db.getPriceImportSchedule).toHaveBeenCalledWith(user.id);
   });
-});
 
   it("creates a watch from plain English with safe defaults", async () => {
     vi.mocked(parseAlertRequest).mockResolvedValue({
@@ -124,3 +123,4 @@ describe("watchedRecords router", () => {
       observationMode: false,
     });
   });
+});

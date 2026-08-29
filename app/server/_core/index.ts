@@ -5,6 +5,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerTestAuthRoute } from "./testAuthRoute";
+import { registerUnsubscribeRoute } from "./unsubscribeRoute";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -60,41 +61,7 @@ async function startServer() {
       return res.status(500).json({ error: error instanceof Error ? error.message : "Price API webhook processing failed." });
     }
   });
-  // GET only confirms; the change happens on POST. A GET that mutates would be
-  // fired by mail-client link scanners and prefetchers, silently switching off
-  // users' alerts without them ever clicking.
-  const unsubscribeToken = (req: express.Request) => {
-    const raw = typeof req.query.token === "string" ? req.query.token : typeof req.body?.token === "string" ? req.body.token : "";
-    return raw.length > 0 && raw.length <= 64 ? raw : "";
-  };
-  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, character =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] as string);
-
-  app.get("/api/unsubscribe", (req, res) => {
-    const token = unsubscribeToken(req);
-    if (!token) return res.status(400).type("html").send("<h1>Invalid unsubscribe link</h1><p>This link is incomplete or expired.</p>");
-    return res.status(200).type("html").send(
-      `<h1>Turn off price-alert emails?</h1>
-       <p>DropWatch will still keep your watch history and in-app target events.</p>
-       <form method="POST" action="/api/unsubscribe">
-         <input type="hidden" name="token" value="${escapeHtml(token)}" />
-         <button type="submit">Turn off price-alert emails</button>
-       </form>`,
-    );
-  });
-
-  app.post("/api/unsubscribe", async (req, res) => {
-    const token = unsubscribeToken(req);
-    if (!token) return res.status(400).type("html").send("<h1>Invalid unsubscribe link</h1><p>This link is incomplete or expired.</p>");
-    try {
-      const changed = await db.unsubscribePriceAlertEmails(token);
-      return res.status(changed ? 200 : 404).type("html").send(changed
-        ? "<h1>Price-alert emails are off</h1><p>DropWatch will still keep your watch history and in-app target events.</p>"
-        : "<h1>Unsubscribe link not found</h1><p>This link may have expired or already been replaced.</p>");
-    } catch {
-      return res.status(500).type("html").send("<h1>We could not update your preference</h1><p>Please try again later.</p>");
-    }
-  });
+  registerUnsubscribeRoute(app, { unsubscribePriceAlertEmails: db.unsubscribePriceAlertEmails });
   app.post("/api/scheduled/price-imports", async (req, res) => {
     try {
       const user = await sdk.authenticateRequest(req);
