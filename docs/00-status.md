@@ -5,8 +5,9 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-08-24
-- **Next command:** clear the last pre-ads blocker — `privacy@usedropwatch.com` mail forwarding
+- **Last updated:** 2026-08-29
+- **Next command:** unchanged by the PR #16 review — the probe is still the priority. Clear the last
+  pre-ads blocker — `privacy@usedropwatch.com` mail forwarding
   (still 0 MX records as of 2026-08-24; the pixel and domain are done and verified) → confirm
   PageView + Lead in Meta Events Manager → launch Meta ads per `marketing/ads/ads-kit.md` → post
   the share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) →
@@ -19,11 +20,11 @@
 | Validation | PENDING PROBE | 2026-08-22 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22 |
 | PRD | — | | brief covers scope; formalize with `/prd` post-GO |
 | Positioning | — | | brief covers positioning; formalize post-GO |
-| Architecture | — | | |
+| Architecture | — | | **Owed.** PR #16 introduced MySQL, Drizzle, Manus OAuth, Postmark, PriceAPI and S3 in one commit with no architecture pass. Run `/architecture` before deploying `app/` — the open questions are where the Express server runs and MySQL vs Supabase Postgres. See `docs/knowledge/decisions.md` (2026-08-29) |
 | Build plan | — | | phases: 0/0 complete |
-| CI pipeline | — | | set up / skipped-on-record |
-| Review | — | | APPROVED / NEEDS_FIX |
-| Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22 |
+| CI pipeline | SET UP | 2026-08-29 | `.github/workflows/ci.yml`: landing-page job (build + asserts root-relative asset base) and app job (typecheck, test, build + asserts vendor runtime stays out of the bundle). Added while reviewing PR #16; the repo had no CI before |
+| Review | NEEDS_FIX | 2026-08-29 | Full review of PR #16 (app + landing merge). Verified on its own Vercel preview that `/` served the bundled Express server as text/plain and `/landing-page/` 404'd. Landing restored to the root, app moved to `app/`, security and test fixes on branch `claude/pr-16-review-py5lco`. Outstanding: the Architecture gate above |
+| Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22. App scope not yet gated — `/security-check` is owed before `app/` ships. Fixed while reviewing PR #16: unauthenticated storage proxy, non-expiring provider callback signature, SameSite=None session cookie, missing appId check, test-auth reachable with NODE_ENV unset, state-changing GET unsubscribe |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
 | Legal (first deploy) | PENDING CONTACT | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. **Blocker unchanged:** `privacy@usedropwatch.com` has no MX records as of 2026-08-24, so the published contact bounces. Gate flips to PASS on a received test email, not on a provider dashboard checkmark. |

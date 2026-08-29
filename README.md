@@ -10,6 +10,16 @@ The repo is a clone of the solo-founder workflow template (manual:
 `docs/00-status.md`, and the source-of-truth validation brief in
 `docs/product/00-brief.md`.
 
+## Repository layout
+
+```text
+/          validation landing page — the live site, and what Vercel builds
+/app/      authenticated DropWatch application (not deployed; see app/README.md)
+```
+
+The two are independent builds. Nothing at the root imports from `app/`, and
+`app/` does not build or serve the landing page.
+
 ## The landing page
 
 Single-page React app (Vite + TypeScript) at the repo root.
