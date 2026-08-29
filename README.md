@@ -1,17 +1,65 @@
 # DropWatch
 
-DropWatch is a retailer-agnostic price monitor. The full authenticated application lives at the repository root; the original validation landing page is preserved in [`landing-page/`](./landing-page/).
+One plain-English price alert, zero noise. Type "Sony WH-1000XM5 under $250,
+Amazon or Best Buy" and hear nothing until it happens.
 
-## Full application
+**Current phase: validation.** This repo holds the founding-user landing page —
+its only job is to prove people want DropWatch badly enough to leave an email.
+The repo is a clone of the solo-founder workflow template (manual:
+`docs/WORKFLOW.md`, narrative: `docs/PLAYBOOK.md`); project state lives in
+`docs/00-status.md`, and the source-of-truth validation brief in
+`docs/product/00-brief.md`.
 
-The root project is a React, Express, tRPC, Drizzle, and Manus Auth application. It accepts plain-English alerts, monitors supported retailer sources automatically, and presents conservative trust evidence for price, shipping, tax, condition, availability, and freshness.
+## Repository layout
 
-Run the root application with `pnpm install`, then `pnpm dev`. Required runtime secrets are configured through the deployment environment and must never be committed.
+```text
+/          validation landing page — the live site, and what Vercel builds
+/app/      authenticated DropWatch application (not deployed; see app/README.md)
+```
 
-## Landing page
+The two are independent builds. Nothing at the root imports from `app/`, and
+`app/` does not build or serve the landing page.
 
-The original Vite validation landing page remains self-contained in `landing-page/`. Run it independently with `npm install` and `npm run dev` from that directory. Its Supabase, analytics, Meta Pixel, and Vercel settings remain separate from the root application.
+## The landing page
 
-## Repository migration
+Single-page React app (Vite + TypeScript) at the repo root.
 
-The combined-repository structure and non-destructive migration boundaries are documented in [`repo-sync-plan.md`](./repo-sync-plan.md). The original landing-page history is preserved on the `fullstack-app-migration` branch and can be reviewed before merging.
+```sh
+npm install
+npm run dev                 # local dev
+npm run build               # production build → dist/
+node scripts/qa-shots.mjs   # QA screenshots + og.png capture (Playwright chromium)
+```
+
+## Lead capture
+
+Signups POST to Supabase (project `business-helper`, table `dropwatch_leads`)
+via the REST API with the publishable key. Stored per lead: email, source
+(which CTA), tier (if a pricing button was clicked), timestamp.
+
+Security model (see `supabase/migrations/20260822_dropwatch_leads.sql`):
+RLS enabled; anon may INSERT only (email format enforced by a check
+constraint); SELECT/UPDATE/DELETE are revoked outright, so nothing can be
+read or changed with the key shipped in the bundle. The publishable key is
+public by design — no secrets live in this repo.
+
+Every form carries a visually-hidden honeypot field; submissions that fill
+it are silently dropped client-side.
+
+Read leads (owner only, via Supabase dashboard / MCP):
+
+```sql
+select email, source, tier, created_at from dropwatch_leads order by created_at desc;
+```
+
+## Deployment
+
+Vercel project `dropwatch` is linked to this repo (root directory = repo
+root) and is the only project that builds it. Every push gets a preview
+deployment; merging to `main` deploys production at https://usedropwatch.com
+(the apex 308-redirects to https://www.usedropwatch.com).
+
+`VITE_*` env vars are baked in at build time, so they must be set on
+`dropwatch` — a build from anywhere else ships without the Meta Pixel. A
+duplicate `drop-watch` project once held the domain and caused exactly that;
+it was deleted on 2026-08-24.
