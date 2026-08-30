@@ -14,7 +14,9 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts"],
+    // client/** is included so tests colocated with client source actually run.
+    // Before this, client/src/lib/tutorial.test.ts existed but was never executed.
+    include: ["server/**/*.test.ts", "server/**/*.spec.ts", "client/**/*.test.ts", "client/**/*.test.tsx"],
     setupFiles: [path.resolve(templateRoot, "server", "testSetup.ts")],
   },
 });
