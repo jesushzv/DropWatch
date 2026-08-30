@@ -23,6 +23,9 @@ const recordFields = z.object({
   observationMode: z.boolean().default(false),
 });
 
+/** ADR-6: automated provider imports are off unless PRICE_IMPORTS_ENABLED=true. */
+const IMPORTS_DISABLED_MSG = "Automated price imports are turned off for this release. Log prices manually instead.";
+
 function notFound() {
   return new TRPCError({ code: "NOT_FOUND", message: "That watch could not be found." });
 }
@@ -130,10 +133,12 @@ export const appRouter = router({
   priceImports: router({
     getSchedule: protectedProcedure.query(async ({ ctx }) => (await db.getPriceImportSchedule(ctx.user.id)) ?? null),
     requestNow: protectedProcedure.mutation(async ({ ctx }) => {
+      if (!ENV.priceImportsEnabled) throw new TRPCError({ code: "PRECONDITION_FAILED", message: IMPORTS_DISABLED_MSG });
       if (!ENV.isProduction) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Publish DropWatch before requesting provider-backed imports." });
       return requestPriceImports({ ownerId: ctx.user.id, publicBaseUrl: publicBaseUrl(ctx.req) });
     }),
     enableRecurring: protectedProcedure.mutation(async ({ ctx }) => {
+      if (!ENV.priceImportsEnabled) throw new TRPCError({ code: "PRECONDITION_FAILED", message: IMPORTS_DISABLED_MSG });
       if (!ENV.isProduction) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Publish DropWatch before enabling recurring imports." });
       const session = decodedSession(ctx.req);
       const existing = await db.getPriceImportSchedule(ctx.user.id);

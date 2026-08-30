@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerTestAuthRoute } from "./testAuthRoute";
 import { registerUnsubscribeRoute } from "./unsubscribeRoute";
+import { registerScheduledImportsRoute } from "./scheduledImportsRoute";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -13,7 +14,7 @@ import { sdk } from "./sdk";
 import * as db from "../db";
 import { isValidPriceWebhookSignature, processPriceApiWebhook, requestPriceImports } from "../priceImport";
 import { serveStatic, setupVite } from "./vite";
-import { assertRequiredEnv } from "./env";
+import { ENV, assertRequiredEnv } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -62,21 +63,10 @@ async function startServer() {
     }
   });
   registerUnsubscribeRoute(app, { unsubscribePriceAlertEmails: db.unsubscribePriceAlertEmails });
-  app.post("/api/scheduled/price-imports", async (req, res) => {
-    try {
-      const user = await sdk.authenticateRequest(req);
-      if (!user.isCron || !user.taskUid) return res.status(403).json({ error: "cron-only" });
-      const schedule = await db.getPriceImportScheduleByTaskUid(user.taskUid);
-      if (!schedule || !schedule.enabled) return res.json({ ok: true, skipped: "orphan-or-paused" });
-      const publicBaseUrl = `${req.protocol}://${req.get("host")}`;
-      const result = await requestPriceImports({ ownerId: schedule.ownerId, publicBaseUrl });
-      return res.json({ ok: true, ...result });
-    } catch (error) {
-      return res.status(500).json({
-        error: error instanceof Error ? error.message : "Scheduled price imports failed.",
-        timestamp: new Date().toISOString(),
-      });
-    }
+  registerScheduledImportsRoute(app, {
+    authenticateRequest: req => sdk.authenticateRequest(req),
+    getPriceImportScheduleByTaskUid: db.getPriceImportScheduleByTaskUid,
+    requestPriceImports,
   });
   // tRPC API
   app.use(

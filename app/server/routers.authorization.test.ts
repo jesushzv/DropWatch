@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
 vi.mock("./db", () => ({
@@ -211,11 +211,13 @@ describe("row ownership is taken from the session, never from procedure input", 
   });
 });
 
-describe("provider-backed imports are gated outside production", () => {
+describe("provider-backed imports are gated", () => {
   beforeEach(() => vi.clearAllMocks());
+  afterEach(() => vi.unstubAllEnvs());
 
   it("refuses requestNow and enableRecurring in a non-production runtime", async () => {
     vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("PRICE_IMPORTS_ENABLED", "true");
 
     await expect(caller().priceImports.requestNow()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
     await expect(caller().priceImports.enableRecurring()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
@@ -223,7 +225,36 @@ describe("provider-backed imports are gated outside production", () => {
     // Neither may reach the paid provider or the scheduler.
     expect(requestPriceImports).not.toHaveBeenCalled();
     expect(createHeartbeatJob).not.toHaveBeenCalled();
+  });
 
-    vi.unstubAllEnvs();
+  // ADR-6: the MVP ships manual logging only. PriceAPI bills per job, so an
+  // accidental enable is a money leak, not just a scope slip.
+  it("refuses both even in production while PRICE_IMPORTS_ENABLED is unset", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("PRICE_IMPORTS_ENABLED", "");
+
+    await expect(caller().priceImports.requestNow()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    await expect(caller().priceImports.enableRecurring()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+
+    expect(requestPriceImports).not.toHaveBeenCalled();
+    expect(createHeartbeatJob).not.toHaveBeenCalled();
+  });
+
+  it("requires the flag to be exactly \"true\", not merely present", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("PRICE_IMPORTS_ENABLED", "1");
+
+    await expect(caller().priceImports.requestNow()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    expect(requestPriceImports).not.toHaveBeenCalled();
+  });
+
+  it("allows requestNow only when production and the flag agree", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("PRICE_IMPORTS_ENABLED", "true");
+    vi.mocked(requestPriceImports).mockResolvedValue({ queued: 0, skipped: 0, failures: [] });
+
+    await caller().priceImports.requestNow();
+
+    expect(requestPriceImports).toHaveBeenCalledWith(expect.objectContaining({ ownerId: OWNER_ID }));
   });
 });

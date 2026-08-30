@@ -46,6 +46,13 @@ export const ENV = {
   get postmarkServerToken() { return process.env.POSTMARK_SERVER_TOKEN ?? ""; },
   get postmarkFromEmail() { return process.env.POSTMARK_FROM_EMAIL ?? ""; },
   get priceApiToken() { return process.env.PRICE_API_TOKEN ?? ""; },
+  /**
+   * ADR-6: the MVP ships with manual price logging only. Automated PriceAPI
+   * imports stay built but off, because `00-brief.md` excludes automated
+   * polling from the MVP and PriceAPI bills per job with cost scaling as
+   * watches x sources with no ceiling. Opt in explicitly, never by default.
+   */
+  get priceImportsEnabled() { return process.env.PRICE_IMPORTS_ENABLED === "true"; },
   get testAuthEnabled() { return process.env.DROPWATCH_TEST_AUTH_ENABLED === "true"; },
   get testAuthSecret() { return process.env.DROPWATCH_TEST_AUTH_SECRET ?? ""; },
 };
