@@ -6,13 +6,11 @@
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
 - **Last updated:** 2026-09-01
-- **Next command:** the probe is the priority and it is starved — 102 unique visitors and 0
-  non-founder signups since 2026-08-23, none of them from a tagged channel, against a 300-visitor
-  floor and a 2026-09-12 decision date. Ads are unblocked code- and infra-side. Remaining founder
-  steps: confirm PageView + Lead in Meta Events Manager → fill out the Facebook page (profile,
-  cover, About, 1-2 organic posts) → launch Meta ads per `marketing/ads/ads-kit.md` → post the
-  share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea`
-  converts the probe when the thresholds resolve (decide by 2026-09-12)
+- **Next command:** launch. The pivoted page is live (PR #19 merged 2026-09-01 20:56 UTC, production
+  READY). Two founder checks are still open on the data — the `?utm_source=test` click has not reached
+  PostHog, and no test signup has fired `Lead`/`signup_submitted` on production — close both, then run
+  Meta ads per `marketing/ads/ads-kit.md` and post the share-kit links with `?utm_source=` tags →
+  `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12)
 
 ## Founder queue — 2026-09-01
 
@@ -21,17 +19,29 @@
 
 **Do before spending on ads (about 30 minutes total):**
 
-- [ ] Send an email to `privacy@usedropwatch.com` from a separate account and confirm it arrives.
-      The Legal gate rests on the 2026-08-24 evidence in PR #15; this is the re-check.
-- [ ] Meta Events Manager → Test events: load the live page (expect `PageView`), submit a test
-      signup (expect `Lead`). Production has been rebuilt twice since the pixel was last confirmed
-      in the served bundle.
-- [ ] Fill out the Facebook page: profile, cover, About, 1–2 organic posts.
+- [x] ~~Send an email to `privacy@usedropwatch.com` from a separate account and confirm it arrives.~~
+      Founder-reported done 2026-09-01 (not independently verifiable from a session).
+- [~] Meta Events Manager → Test events. Founder-reported done 2026-09-01. **Data check:** no
+      `signup_submitted` in PostHog and no row in `dropwatch_leads` on 2026-09-01, so no test signup
+      was submitted on a production host — `PageView` may be confirmed, but `Lead` fires only from a
+      real submission and is **unproven**. One real test signup on `www.usedropwatch.com` closes it;
+      record the time so it is discounted from the probe.
+- [x] ~~Fill out the Facebook page: profile, cover, About, 1–2 organic posts.~~ Founder-reported done
+      2026-09-01. Corroborated: a pageview at 18:02 UTC arrived from `l.facebook.com` carrying an
+      `fbclid` — a link on the page is live and clicks through.
 - [ ] Click a link of the form `https://www.usedropwatch.com/?utm_source=test`, then confirm
-      PostHog shows `utm_source = test` on that pageview. No tagged traffic has ever reached the
-      site, so the attribution path is unexercised.
-- [ ] Merge PR #19 (canonical host + pricing-modal keyboard fix).
-- [ ] Ad and post links use **`https://www.usedropwatch.com/`** with the `www`, never the apex.
+      PostHog shows `utm_source = test` on that pageview. Founder-reported done 2026-09-01, but
+      **PostHog has no pageview with `utm_source = test`** — the only pageview since 17:00 UTC is the
+      Facebook click above, which carried `fbclid` and no `utm_source`. Likely causes: the click was
+      on a preview/localhost host (gated out of analytics by design), an ad blocker, or the tag was
+      not on the link. Still open. Note the Facebook click *did* keep its query string on `www`, which
+      is partial evidence the path works; the apex→`www` 308 is still unexercised.
+- [x] ~~Merge PR #19.~~ Merged 2026-09-01 20:56 UTC (commit `3bd0c75`). Production deployment
+      `dpl_8R3ktFmQ6HhaKY6mXUnJndeKqZaK` READY on the `dropwatch` project — the pivoted page is live.
+- [ ] Ad and post links use **`https://www.usedropwatch.com/?utm_source=…`** with the `www` and a
+      tag. The Facebook post link that produced the 18:02 UTC click had **no `utm_source`**, so that
+      traffic lands as untagged; `$referrer = l.facebook.com` is the only fallback for attributing it.
+      Add `?utm_source=facebook` to the post link.
 
 **Decide (each is a founder call; the first is measurement, the rest spend the one copy iteration):**
 
@@ -136,6 +146,17 @@ channels are running.
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-01 — **Pivoted landing page is live; pre-ad checks reconciled against the data.** PR #19
+  merged at 20:56 UTC (`3bd0c75`); Vercel production deployment `dpl_8R3ktFmQ6HhaKY6mXUnJndeKqZaK`
+  READY on `dropwatch`. Founder reported all five pre-ad checks done. Checked against PostHog and
+  Supabase for 2026-09-01: exactly one pageview since 17:00 UTC (18:02, `www`, referrer
+  `l.facebook.com`, `fbclid` present, `utm_source` absent, Chrome desktop, MX); zero
+  `signup_submitted`; zero `tier_click`; zero new `dropwatch_leads` rows. So: the Facebook page has
+  a live link that clicks through (good); the `utm_source=test` pageview is **not** in PostHog; no
+  test signup was submitted on production, so the Meta `Lead` event is unproven. Both are recorded
+  as open in the founder queue. The Facebook click is founder traffic and is discounted from the
+  probe.
 
 - 2026-09-01 — **Pivot ratified; landing page rewritten to validate it; copy iteration spent.**
   Founder decisions, all four in one sitting: (1) ratify the trust-evidence pivot — recorded in
