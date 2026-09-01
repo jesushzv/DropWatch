@@ -204,6 +204,24 @@ channels are running.
   as open in the founder queue. The Facebook click is founder traffic and is discounted from the
   probe.
 
+- 2026-09-01 — **ADR-4 + ADR-5 executed; the app now has zero Manus dependencies on any product
+  path.** Same branch/draft PR as ADR-2/3. **ADR-4:** `_core/llm.ts` is the official Anthropic SDK
+  (model `claude-opus-5`, `ANTHROPIC_MODEL` overrides); the per-call model-list round-trip is gone;
+  verdict fallbacks unchanged and now unit-tested. Removing the gateway exposed a masked test — the
+  stale-offer suppression assertion had only ever passed because the old gateway's model-list fetch
+  consumed the stubbed download; the test now asserts the trust layer's real contract
+  (log-but-never-alert). **ADR-5:** the Express app is extracted to `server/_core/app.ts` and served
+  both by the long-running local entry and by `app/api/index.ts` as a single Vercel function;
+  `app/vercel.json` carries rewrites, static SPA output, and the 6-hourly Vercel Cron that replaces
+  the deleted Manus heartbeat (`CRON_SECRET`-authenticated, refuses all callers when unset).
+  **Infra:** Vercel project `dropwatch-app` (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`) created, Root
+  Directory `app/`, no domains — and `dropwatch` verified untouched afterward (same domains,
+  deployment, and updatedAt). Suite: 141 passed | 2 skipped with a database; typecheck, server
+  build, and the exact Vercel buildCommand all clean. Remaining founder env setup before first
+  deploy: `DATABASE_URL` (after setting the `dropwatch_app` role password), `JWT_SECRET`,
+  `SUPABASE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_ID`, `CRON_SECRET`,
+  `ANTHROPIC_API_KEY`, `DATABASE_POOL_MAX=1`, plus Postmark/PriceAPI when those features turn on.
+
 - 2026-09-01 — **ADR-2 + ADR-3 executed on `claude/dropwatch-adr-migration` (draft PR); app database
   provisioned.** The app is now Postgres + Supabase Auth in code, with a provisioned database:
 

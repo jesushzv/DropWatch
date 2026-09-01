@@ -40,15 +40,17 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
   `dropwatch_leads`, insert-only RLS for anon; migration in `supabase/migrations/`.
 - **Hosting (landing page):** Vercel project `dropwatch` (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`)
   builds the repo root and is the **only** project that serves the landing page. It holds both
-  `usedropwatch.com` and `www.usedropwatch.com`.
-- **Hosting (app):** Vercel project `dropwatch-app` (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`, root
-  directory `app`, created 2026-09-01 by the ADR-5 work) builds `app/` only. It must **never** hold
-  `usedropwatch.com` or `www` — the landing hosts stay on `dropwatch`. Named here per the
-  2026-08-24 decision that any second project is declared, not discovered. `VITE_META_PIXEL_ID` is set on it, and Vite
+  `usedropwatch.com` and `www.usedropwatch.com`. `VITE_META_PIXEL_ID` is set on it, and Vite
   inlines `VITE_*` vars at build time, so a deployment from any other project silently ships a
   pixel-less bundle. **Before trusting a production URL, check which project serves it** — the
   duplicate-project trap in the 2026-08-24 entry of `docs/knowledge/decisions.md` cost a
   near-miss on the whole ad budget.
+- **Hosting (application):** Vercel project `dropwatch-app` (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`,
+  Root Directory `app`, config in `app/vercel.json`; created 2026-09-01 for ADR-5) builds `app/`
+  only. It must **never** hold `usedropwatch.com` or `www` — the landing hosts stay on
+  `dropwatch`. Named here per the 2026-08-24 decision that any second project is declared, not
+  discovered. Its database is Supabase project `gqezqgasuqqpnqiljsig`; env vars per
+  `app/.env.example`.
 - **Apex redirects to `www`:** `https://usedropwatch.com/` 308-redirects to
   `https://www.usedropwatch.com/`. Both hosts are in `PRODUCTION_HOSTS`, so analytics fires either
   way. `www` is the canonical host: `<link rel="canonical">`, `og:url` and the social image URLs in
