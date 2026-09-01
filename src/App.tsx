@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { trackTierClick } from "./lib/analytics";
 import Reveal from "./components/Reveal";
@@ -113,14 +113,48 @@ const FAQS = [
 
 export default function App() {
   const [tierModal, setTierModal] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
 
+  // While the modal is open it owns the keyboard: focus moves into it, Tab
+  // cycles inside it, Escape closes it, and the page behind stops scrolling.
+  // On close, focus returns to the tier button that opened it. The honeypot
+  // field is excluded from the cycle — it is deliberately unreachable.
   useEffect(() => {
     if (!tierModal) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const modal = modalRef.current;
+    modal?.focus();
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setTierModal(null);
+      if (e.key === "Escape") {
+        setTierModal(null);
+        return;
+      }
+      if (e.key !== "Tab" || !modal) return;
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      opener?.focus();
+    };
   }, [tierModal]);
 
   return (
@@ -390,7 +424,7 @@ export default function App() {
             if (e.target === e.currentTarget) setTierModal(null);
           }}
         >
-          <div className="modal">
+          <div className="modal" ref={modalRef} tabIndex={-1}>
             <button className="modal__close" onClick={() => setTierModal(null)} aria-label="Close">
               ×
             </button>
