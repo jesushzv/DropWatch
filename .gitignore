@@ -16,3 +16,10 @@ coverage/
 .DS_Store
 *.log
 *.tsbuildinfo
+
+# app/ workspace
+.pnpm-store/
+app/.manus-logs/
+app/.webdev/
+app/.project-config.json
+app/client/public/__manus__/version.json

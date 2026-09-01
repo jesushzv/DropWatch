@@ -5,25 +5,27 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-08-24
-- **Next command:** confirm PageView + Lead in Meta Events Manager (code and domain both verified;
-  this is the last unverified box) → fill out the Facebook page (profile, cover, About, 1-2 organic
-  posts) → launch Meta ads per `marketing/ads/ads-kit.md` → post the share-kit posts with
-  UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea` converts the probe when
-  the thresholds resolve (decide by 2026-09-12)
+- **Last updated:** 2026-09-01
+- **Next command:** the probe is the priority and it is starved — 102 unique visitors and 0
+  non-founder signups since 2026-08-23, none of them from a tagged channel, against a 300-visitor
+  floor and a 2026-09-12 decision date. Ads are unblocked code- and infra-side. Remaining founder
+  steps: confirm PageView + Lead in Meta Events Manager → fill out the Facebook page (profile,
+  cover, About, 1-2 organic posts) → launch Meta ads per `marketing/ads/ads-kit.md` → post the
+  share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea`
+  converts the probe when the thresholds resolve (decide by 2026-09-12)
 
 ## Gate ledger
 
 | Gate | Verdict | Date | Notes |
 |---|---|---|---|
 | Validation | PENDING PROBE | 2026-08-22 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22 |
-| PRD | — | | brief covers scope; formalize with `/prd` post-GO |
+| PRD | — | | brief covers scope; formalize with `/prd` post-GO. **Now an input gap:** the architecture brief had to be written against `00-brief.md` because `docs/product/02-prd.md` does not exist |
 | Positioning | — | | brief covers positioning; formalize post-GO |
-| Architecture | — | | |
+| Architecture | DONE | 2026-08-29 | `docs/engineering/01-architecture.md`. Verdict: keep the app as the MVP, do not rebuild (ADR-1), conditional on four cuts — Supabase Postgres + RLS (ADR-2), Supabase Auth (ADR-3), Anthropic direct (ADR-4), delete dead vendor surface (ADR-7). Hosting: Vercel serverless (ADR-5). MVP ships manual price logging only; PriceAPI imports built but disabled (ADR-6). **Written against `00-brief.md` — no PRD exists.** Brief only; nothing implemented, and nothing should be until the validation gate resolves |
 | Build plan | — | | phases: 0/0 complete |
-| CI pipeline | — | | set up / skipped-on-record |
-| Review | — | | APPROVED / NEEDS_FIX |
-| Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22 |
+| CI pipeline | SET UP | 2026-08-29 | `.github/workflows/ci.yml`: landing-page job (build + asserts root-relative asset base) and app job (typecheck, test, build + asserts vendor runtime stays out of the bundle). Runs a MySQL service so the six integration suites execute rather than skip — **112 passed / 2 skipped in CI**, vs 105/9 without a database — and fails the job if an integration suite skips, so a broken database cannot look green. Job timeouts and concurrency cancellation set. Added while reviewing PR #16; the repo had no CI before |
+| Review | RESOLVED | 2026-08-29 | Full review of PR #16 found it would have taken production down — verified on its own Vercel preview that `/` served the bundled Express server as text/plain and `/landing-page/` 404'd. Fixes in #17 (merged into #16, then #16 → main, commit 0c8ec66): landing restored to the root, app moved to `app/`, 6 security fixes, suite made hermetic (8 failures → 0), production HTML 368 kB → 826 B, initial JS 929 → 531 kB, CI added. Production re-verified after merge: landing page at `/`, `/privacy` 200, Meta Pixel and `dropwatch_leads` capture intact. Follow-up in PR #18 closed the coverage gaps: **50 → 112 tests**, adding router authorization coverage (every protected procedure rejects anonymous callers; row ownership comes from the session, never from input) and covering the six security fixes. Each new suite was mutation-tested. Still owed: `/security-check`, and eslint/prettier which have no CI gate |
+| Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22. App scope not yet gated — `/security-check` is owed before `app/` ships. Fixed while reviewing PR #16: unauthenticated storage proxy, non-expiring provider callback signature, SameSite=None session cookie, missing appId check, test-auth reachable with NODE_ENV unset, state-changing GET unsubscribe |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
 | Legal (first deploy) | PASS | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. `privacy@usedropwatch.com` forwarding via ImprovMX (MX + SPF TXT confirmed live in DNS 2026-08-24); founder confirmed a test email sent from a separate account was received. |
