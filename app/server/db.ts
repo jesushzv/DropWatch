@@ -514,6 +514,12 @@ export async function getPriceImportSchedule(ownerId: number): Promise<PriceImpo
   return withUserContext(ownerId, tx => readPriceImportSchedule(tx, ownerId));
 }
 
+export async function listEnabledPriceImportSchedules(): Promise<PriceImportSchedule[]> {
+  return withServiceContext(tx =>
+    tx.select().from(priceImportSchedules).where(eq(priceImportSchedules.enabled, true)),
+  );
+}
+
 export async function getPriceImportScheduleByTaskUid(taskUid: string): Promise<PriceImportSchedule | undefined> {
   return withServiceContext(async tx => {
     const schedules = await tx.select().from(priceImportSchedules).where(eq(priceImportSchedules.scheduleCronTaskUid, taskUid)).limit(1);
