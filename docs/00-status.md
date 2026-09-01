@@ -204,6 +204,43 @@ channels are running.
   as open in the founder queue. The Facebook click is founder traffic and is discounted from the
   probe.
 
+- 2026-09-01 — **ADR-2 + ADR-3 executed on `claude/dropwatch-adr-migration` (draft PR); app database
+  provisioned.** The app is now Postgres + Supabase Auth in code, with a provisioned database:
+
+  - **ADR-2:** `app/` migrated MySQL→Postgres (drizzle pg-core, `postgres` driver, `mysql2` gone).
+    RLS is *enforcing*, not decorative: the app connects as the non-owner `dropwatch_app` role and
+    every query runs in a transaction asserting the caller's identity; the migrations carry the
+    policies. `watchEvents` has no UPDATE/DELETE grant — audit trail immutable at the database.
+    Proven with captured output: as `dropwatch_app`, an unfiltered `SELECT` under tenant A returns
+    only A's rows; a no-context query returns 0 rows; a cross-tenant insert fails with "new row
+    violates row-level security policy"; a service-context `UPDATE` on `watchEvents` fails with
+    "permission denied". These proofs are codified in `server/rls.integration.test.ts` and run in CI.
+  - **ADR-3:** Manus OAuth deleted (`oauth.ts`, `manusTypes.ts`, the cron-session path). Supabase
+    Auth magic-link login on the client; `POST /api/auth/session` verifies the Supabase access token
+    (JWKS, issuer+audience pinned) and mints the same first-party HS256 cookie as before —
+    `users.openId` now holds the Supabase auth user UUID. Scheduled imports authenticate via
+    `CRON_SECRET` (the Vercel Cron contract ADR-5 will use); the endpoint refuses everything when
+    the secret is unset.
+  - **CI:** MySQL service → Postgres 16; tests run as `dropwatch_app` so CI exercises RLS; the
+    fail-on-skipped-integration-suite guard is unchanged. Suite grew 112→132 passing with a DB
+    (119/15 without); typecheck and build clean.
+  - **Database provisioned** in Supabase project `gqezqgasuqqpnqiljsig` (see decision log for why
+    not a new project: free-tier 2-project cap). Both migrations applied, drizzle migration
+    tracking seeded, RLS smoke-verified remotely (no-context 0 rows / tenant sees own row only /
+    service sees all), Supabase security advisors clean for the app's objects after pinning
+    `search_path` on the helper functions. **Found and removed:** an undocumented DropWatch schema
+    prototype in that project (migrations `dropwatch_app_*`, 2026-08-30 — the day after the
+    architecture brief; tenant-a/b test fixtures only). Work outside the workflow leaves no trail;
+    recorded here so it has one.
+  - **Founder to-dos before the app can run anywhere:** set a password for `dropwatch_app`
+    (Supabase SQL editor: `ALTER ROLE dropwatch_app WITH LOGIN PASSWORD '<generated>'` — kept out
+    of this session on purpose) and, when deploying, the env vars in `app/.env.example`.
+    Remaining ADRs: ADR-4 (Anthropic) and ADR-5 (Vercel serverless + the app's own Vercel
+    project) are next on the same branch; then `/security-check` for app scope.
+  - Advisor findings NOT ours, surfaced for awareness: the contracts-app prototype sharing this
+    project has `email_campaigns`/`promo_codes` with RLS enabled but no policies, and a
+    SECURITY DEFINER function `rls_auto_enable()` executable by `anon` via PostgREST.
+
 - 2026-09-01 — **Pivot ratified; landing page rewritten to validate it; copy iteration spent.**
   Founder decisions, all four in one sitting: (1) ratify the trust-evidence pivot — recorded in
   `decisions.md`, addendum on `00-brief.md`; (2) Basic-tier clicks keep counting toward payment
