@@ -20,15 +20,15 @@ DO $$ BEGIN
   END IF;
 END $$;
 --> statement-breakpoint
-CREATE OR REPLACE FUNCTION "app_current_user_id"() RETURNS integer LANGUAGE sql STABLE AS $$
+CREATE OR REPLACE FUNCTION "app_current_user_id"() RETURNS integer LANGUAGE sql STABLE SET search_path = '' AS $$
   SELECT nullif(current_setting('app.user_id', true), '')::integer
 $$;
 --> statement-breakpoint
-CREATE OR REPLACE FUNCTION "app_current_open_id"() RETURNS text LANGUAGE sql STABLE AS $$
+CREATE OR REPLACE FUNCTION "app_current_open_id"() RETURNS text LANGUAGE sql STABLE SET search_path = '' AS $$
   SELECT nullif(current_setting('app.open_id', true), '')
 $$;
 --> statement-breakpoint
-CREATE OR REPLACE FUNCTION "app_is_service"() RETURNS boolean LANGUAGE sql STABLE AS $$
+CREATE OR REPLACE FUNCTION "app_is_service"() RETURNS boolean LANGUAGE sql STABLE SET search_path = '' AS $$
   SELECT current_setting('app.role', true) = 'service'
 $$;
 --> statement-breakpoint
