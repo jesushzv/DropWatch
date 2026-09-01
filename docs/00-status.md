@@ -5,19 +5,20 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-08-29
-- **Next command:** unchanged by the PR #16 review — the probe is still the priority. Clear the last
-  pre-ads blocker — `privacy@usedropwatch.com` mail forwarding
-  (still 0 MX records as of 2026-08-24; the pixel and domain are done and verified) → confirm
-  PageView + Lead in Meta Events Manager → launch Meta ads per `marketing/ads/ads-kit.md` → post
-  the share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) →
-  `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12)
+- **Last updated:** 2026-09-01
+- **Next command:** the probe is the priority and it is starved — 102 unique visitors and 0
+  non-founder signups since 2026-08-23, none of them from a tagged channel, against a 300-visitor
+  floor and a 2026-09-12 decision date. Ads are unblocked code- and infra-side. Remaining founder
+  steps: confirm PageView + Lead in Meta Events Manager → fill out the Facebook page (profile,
+  cover, About, 1-2 organic posts) → launch Meta ads per `marketing/ads/ads-kit.md` → post the
+  share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea`
+  converts the probe when the thresholds resolve (decide by 2026-09-12)
 
 ## Gate ledger
 
 | Gate | Verdict | Date | Notes |
 |---|---|---|---|
-| Validation | PENDING PROBE | 2026-08-22 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22 |
+| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-01 the probe is starved:** 102 unique visitors, 0 non-founder signups, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry |
 | PRD | — | | brief covers scope; formalize with `/prd` post-GO. **Now an input gap:** the architecture brief had to be written against `00-brief.md` because `docs/product/02-prd.md` does not exist |
 | Positioning | — | | brief covers positioning; formalize post-GO |
 | Architecture | DONE | 2026-08-29 | `docs/engineering/01-architecture.md`. Verdict: keep the app as the MVP, do not rebuild (ADR-1), conditional on four cuts — Supabase Postgres + RLS (ADR-2), Supabase Auth (ADR-3), Anthropic direct (ADR-4), delete dead vendor surface (ADR-7). Hosting: Vercel serverless (ADR-5). MVP ships manual price logging only; PriceAPI imports built but disabled (ADR-6). **Written against `00-brief.md` — no PRD exists.** Brief only; nothing implemented, and nothing should be until the validation gate resolves |
@@ -27,7 +28,7 @@
 | Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22. App scope not yet gated — `/security-check` is owed before `app/` ships. Fixed while reviewing PR #16: unauthenticated storage proxy, non-expiring provider callback signature, SameSite=None session cookie, missing appId check, test-auth reachable with NODE_ENV unset, state-changing GET unsubscribe |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
-| Legal (first deploy) | PENDING CONTACT | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. **Blocker unchanged:** `privacy@usedropwatch.com` has no MX records as of 2026-08-24, so the published contact bounces. Gate flips to PASS on a received test email, not on a provider dashboard checkmark. |
+| Legal (first deploy) | PASS | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. `privacy@usedropwatch.com` forwarding via ImprovMX (MX + SPF TXT confirmed live in DNS 2026-08-24); founder confirmed a test email sent from a separate account was received. |
 | Observability | — | | verified / skipped-on-record |
 | Ship | — | | |
 | Launch | — | | |
@@ -80,6 +81,57 @@
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-01 — **Probe is starved, not failing; pre-marketing readiness audited.** Read directly
+  from PostHog and Supabase, counting from 2026-08-23 as committed:
+
+  | Signal | Actual | Threshold |
+  |---|---|---|
+  | Unique visitors | 102 (105 pageviews) | 300 floor before any read |
+  | `signup_submitted` | 1 — the founder test signup, 2026-08-23 20:36 | ≥30 for GO |
+  | `tier_click` | 3, all one person, 2026-08-23 20:01 (founder QA) | ≥20% of signups |
+  | Pageviews carrying a `utm_source` | 0 | 100 per channel before a channel read |
+
+  Supabase `dropwatch_leads` holds 2 rows (2026-08-22 build QA, 2026-08-23 founder test), matching
+  PostHog exactly — the capture pipeline agrees end to end. No ads and no UTM-tagged posts have
+  run, so there is no demand signal yet because there has been no acquisition. At the current
+  untagged rate the 300-visitor floor will not be met by 2026-09-12, which lands the pre-committed
+  "couldn't buy the denominator" finding — a channel problem, not a KILL.
+
+  **Verified this session (code + data):** capture form validates the email, submits to
+  `dropwatch_leads`, then fires `signup_submitted` and the Meta `Lead` — the honeypot path returns
+  before all three, so bots cannot inflate the probe. `tier` flows from the pricing modal into both
+  Supabase and PostHog. Analytics and pixel are both gated to `PRODUCTION_HOSTS`, so founder and
+  preview traffic stay out of the denominator. Today's production deployment (`a0642c6`, the Speed
+  Insights merge) is READY on the `dropwatch` project, which holds both `usedropwatch.com` and
+  `www`.
+
+  **Not verified this session, and each is a founder-side check before spend:** (1) the ImprovMX MX
+  and SPF records behind the Legal gate — this session's network policy blocks every DNS resolver,
+  so the gate rests on the 2026-08-24 evidence in PR #15, not on a fresh read; (2) the Meta Pixel
+  in *today's* bundle — the pixel was confirmed in the 2026-08-24 bundle, but production has been
+  rebuilt twice since, and the duplicate-project near-miss is exactly this class of assumption;
+  (3) that the apex→`www` 308 preserves the `?utm_source=` query string, which no traffic has ever
+  exercised.
+
+  **Gap worth knowing before ads:** `dropwatch_leads` has no channel column — `source` is the
+  on-page placement (`hero`/`demo`/`final`/`pricing`). Channel attribution for a signup exists only
+  as the `utm_source` property PostHog attaches to the event. If that ever fails, there is no
+  fallback record of where a lead came from.
+
+  **On the built app:** it cannot be put in users' hands today, and this is a fact about
+  infrastructure rather than features. It has no host and no serverless entry point (ADR-5 chose
+  Vercel serverless; nothing has been built), no provisioned database (the schema is MySQL, and
+  ADR-2 migrates it to Supabase Postgres), and login runs through Manus OAuth (ADR-3 replaces it),
+  so the app cannot authenticate a user without the platform it is being moved off. `/security-check`
+  is also still owed for app scope. ADR-2/3/4/5 are the work between here and a usable product.
+
+- 2026-08-24 — **Legal gate → PASS.** `privacy@usedropwatch.com` forwarding set up via ImprovMX;
+  MX (`mx1`/`mx2.improvmx.com`) and SPF TXT records confirmed live in DNS, and founder confirmed a
+  test email sent from a separate account was received. This was the last item blocking the ad
+  launch. Everything on the pre-flight checklist in `marketing/ads/ads-kit.md` is now done except
+  the Meta Events Manager Test-events check and filling out the Facebook page — both one-time,
+  non-code steps for the founder.
 
 - 2026-08-24 — **Pixel confirmed live on the ad destination; duplicate project gone.** Founder moved
   `usedropwatch.com` (and `www`) onto the `dropwatch` project and deleted `drop-watch`

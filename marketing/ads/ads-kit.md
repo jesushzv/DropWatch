@@ -100,10 +100,9 @@ Ordered by what blocks a launch, not by effort.
 1. **Privacy policy + terms reachable** — `/privacy` and `/terms`, linked in the page footer.
    Live as of 2026-08-23. Meta's ad review looks for these on a data-collecting landing page, and
    the site runs analytics plus the pixel.
-2. **The privacy contact actually resolves** — `privacy@usedropwatch.com` must reach a real inbox.
-   Domain done; **mail forwarding still outstanding** (no MX records as of 2026-08-24). See
-   "Domain + privacy contact setup" below. A published contact address that bounces is the one
-   failure worse than not publishing one.
+2. **The privacy contact actually resolves — DONE 2026-08-24.** `privacy@usedropwatch.com`
+   forwards via ImprovMX (MX + SPF TXT confirmed live in DNS); founder sent a test email from a
+   separate account and confirmed it arrived. See "Domain + privacy contact setup" below.
 3. **Pixel verified receiving on the domain the ads point at** — Events Manager → Test events
    should show `PageView` on load and `Lead` on a test signup, opened via the live domain, not a
    vercel.app host. **Still to do**; the code side is confirmed.
@@ -139,25 +138,22 @@ serving host — harmless for the probe, both hosts being in `PRODUCTION_HOSTS`.
 served *without* the `x-robots-tag: noindex` header the vercel.app host carries, so the page is now
 indexable — intended, but worth knowing it changed.
 
-**2. Forward the privacy alias — OUTSTANDING, and the last thing blocking ads.**
-Confirmed 2026-08-24: the domain has **no MX and no TXT records at all**, so mail to
-`privacy@usedropwatch.com` currently goes nowhere. That address is published on two live pages.
+**2. Forward the privacy alias — DONE 2026-08-24.**
+`privacy@usedropwatch.com` forwards via ImprovMX. DNS confirmed live:
 
-Use an MX-record forwarding service — ImprovMX and Forward Email both have free tiers and work by
-adding records in Vercel's DNS panel, no nameserver change. **Do not use Cloudflare Email Routing
-here:** it requires pointing the domain's nameservers at Cloudflare, which would take DNS
-management away from Vercel for no benefit.
+```
+MX   10  mx1.improvmx.com
+MX   20  mx2.improvmx.com
+TXT      v=spf1 include:spf.improvmx.com ~all
+```
 
-The flow is the same for either provider:
+Founder sent a test email from a separate account and confirmed delivery — the bar this gate was
+held to, since a verified-in-DNS status is not proof mail actually arrives.
 
-1. Sign up, add `usedropwatch.com` as the domain.
-2. Create the alias `privacy@` → forward to the founder's personal inbox. A catch-all (`*@`) is
-   also fine and means a typo'd address still reaches you.
-3. The provider shows the exact MX records (two, with priorities) and one SPF TXT record. Add them
-   in Vercel → Domains → `usedropwatch.com` → DNS. **Copy them from the provider's own screen, not
-   from memory or from this file** — hostnames change and a stale record silently breaks delivery.
-4. Wait for the provider's dashboard to report the domain verified. Vercel-hosted DNS usually
-   propagates in minutes, not hours.
+If this ever needs redoing (new domain, provider change), the flow: sign up with an MX-record
+forwarder, add the alias (a catch-all `*@` is convenient too), copy the exact records the provider
+shows — not from memory or this file, hostnames change — into Vercel → Domains →
+`usedropwatch.com` → DNS, then **send a real test email and confirm receipt** before trusting it.
 
 **Then send a real test email to `privacy@usedropwatch.com` from an unrelated account and confirm
 it lands.** Do not treat a green checkmark in the provider dashboard as proof — only a received
