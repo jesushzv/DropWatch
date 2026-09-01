@@ -520,18 +520,10 @@ export async function listEnabledPriceImportSchedules(): Promise<PriceImportSche
   );
 }
 
-export async function getPriceImportScheduleByTaskUid(taskUid: string): Promise<PriceImportSchedule | undefined> {
-  return withServiceContext(async tx => {
-    const schedules = await tx.select().from(priceImportSchedules).where(eq(priceImportSchedules.scheduleCronTaskUid, taskUid)).limit(1);
-    return schedules[0];
-  });
-}
-
-export async function createPriceImportSchedule(input: { ownerId: number; taskUid: string; cronExpression: string }) {
+export async function createPriceImportSchedule(input: { ownerId: number; cronExpression: string }) {
   return withUserContext(input.ownerId, async tx => {
     await tx.insert(priceImportSchedules).values({
       ownerId: input.ownerId,
-      scheduleCronTaskUid: input.taskUid,
       cronExpression: input.cronExpression,
       market: "us",
       enabled: true,

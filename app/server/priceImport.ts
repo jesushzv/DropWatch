@@ -6,7 +6,8 @@ import { PriceSourceId, sourceLabel } from "./priceSources";
 import { writeDealVerdict } from "./watchAi";
 import { normalizeOffer, offerMeetsAlertBasis, NormalizedOffer } from "./trustLayer";
 
-export const PRICE_IMPORT_CRON = "0 0 */6 * * *";
+// 5-field cron, matching the Vercel Cron entry in vercel.json (ADR-5).
+export const PRICE_IMPORT_CRON = "0 */6 * * *";
 export const PRICE_API_MARKET = "us";
 
 type UnknownRecord = Record<string, unknown>;

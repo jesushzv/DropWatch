@@ -28,14 +28,8 @@ vi.mock("./priceImport", async () => ({
   requestPriceImports: vi.fn(),
 }));
 
-vi.mock("./_core/heartbeat", () => ({
-  createHeartbeatJob: vi.fn(),
-  updateHeartbeatJob: vi.fn(),
-}));
-
 import { appRouter } from "./routers";
 import * as db from "./db";
-import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { requestPriceImports } from "./priceImport";
 
 /** The caller. Every assertion below checks this id reaches the data layer. */
@@ -198,7 +192,22 @@ describe("row ownership is taken from the session, never from procedure input", 
 
     expect(db.getPriceImportSchedule).toHaveBeenCalledWith(OWNER_ID);
     expect(db.setPriceImportScheduleEnabled).toHaveBeenCalledWith(OWNER_ID, false);
-    expect(updateHeartbeatJob).toHaveBeenCalledWith("task-1", { enable: false }, expect.anything());
+  });
+
+  it("creates or re-enables the caller's own schedule when enabling recurring imports", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.mocked(db.getPriceImportSchedule).mockResolvedValue(undefined);
+    vi.mocked(db.createPriceImportSchedule).mockResolvedValue({} as never);
+
+    await caller().priceImports.enableRecurring();
+    expect(db.createPriceImportSchedule).toHaveBeenCalledWith(expect.objectContaining({ ownerId: OWNER_ID }));
+
+    vi.mocked(db.getPriceImportSchedule).mockResolvedValue({ enabled: false } as never);
+    vi.mocked(db.setPriceImportScheduleEnabled).mockResolvedValue({} as never);
+
+    await caller().priceImports.enableRecurring();
+    expect(db.setPriceImportScheduleEnabled).toHaveBeenCalledWith(OWNER_ID, true);
+    vi.unstubAllEnvs();
   });
 
   it("refuses to disable a schedule that does not exist rather than touching another one", async () => {
@@ -206,7 +215,6 @@ describe("row ownership is taken from the session, never from procedure input", 
 
     await expect(caller().priceImports.disableRecurring()).rejects.toMatchObject({ code: "NOT_FOUND" });
 
-    expect(updateHeartbeatJob).not.toHaveBeenCalled();
     expect(db.setPriceImportScheduleEnabled).not.toHaveBeenCalled();
   });
 });
@@ -220,9 +228,10 @@ describe("provider-backed imports are gated outside production", () => {
     await expect(caller().priceImports.requestNow()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
     await expect(caller().priceImports.enableRecurring()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 
-    // Neither may reach the paid provider or the scheduler.
+    // Neither may reach the paid provider or touch the schedule table.
     expect(requestPriceImports).not.toHaveBeenCalled();
-    expect(createHeartbeatJob).not.toHaveBeenCalled();
+    expect(db.createPriceImportSchedule).not.toHaveBeenCalled();
+    expect(db.setPriceImportScheduleEnabled).not.toHaveBeenCalled();
 
     vi.unstubAllEnvs();
   });
