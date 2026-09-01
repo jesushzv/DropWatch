@@ -14,6 +14,39 @@
   share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea`
   converts the probe when the thresholds resolve (decide by 2026-09-12)
 
+## Founder queue — 2026-09-01
+
+> What only the founder can do or decide. Each item is dated when added; strike it with a date when
+> done. This block exists so the list survives the chat it was made in.
+
+**Do before spending on ads (about 30 minutes total):**
+
+- [ ] Send an email to `privacy@usedropwatch.com` from a separate account and confirm it arrives.
+      The Legal gate rests on the 2026-08-24 evidence in PR #15; this is the re-check.
+- [ ] Meta Events Manager → Test events: load the live page (expect `PageView`), submit a test
+      signup (expect `Lead`). Production has been rebuilt twice since the pixel was last confirmed
+      in the served bundle.
+- [ ] Fill out the Facebook page: profile, cover, About, 1–2 organic posts.
+- [ ] Click a link of the form `https://www.usedropwatch.com/?utm_source=test`, then confirm
+      PostHog shows `utm_source = test` on that pageview. No tagged traffic has ever reached the
+      site, so the attribution path is unexercised.
+- [ ] Merge PR #19 (canonical host + pricing-modal keyboard fix).
+- [ ] Ad and post links use **`https://www.usedropwatch.com/`** with the `www`, never the apex.
+
+**Decide (each is a founder call; the first is measurement, the rest spend the one copy iteration):**
+
+- [ ] **Exclude `tier = 'Basic'` from the payment-intent numerator?** The "≥20% of signups via a
+      pricing-tier button" threshold reads as willingness to pay, but the Free plan has an
+      identical button. Recommended: yes. Decide before traffic, not after.
+- [ ] **Pro Plus pricing.** $9.99/mo × 12 = $119.88; Pro Plus is $129/yr. The upgrade costs more
+      than the plan it sits above. Change, or leave and accept the read?
+- [ ] **"Watch every store at once"** vs. two stores at launch. Soften, or leave?
+- [ ] **Ratify or reject the app's pivot** (see the 2026-09-01 pivot entry in the log) and decide
+      whether the landing page should validate the pivoted promise or the original one.
+
+**Then:** launch ads and post the share-kit links. ~200 more visitors needed by 2026-09-12; zero
+channels are running.
+
 ## Gate ledger
 
 | Gate | Verdict | Date | Notes |
@@ -94,6 +127,37 @@
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-01 — **The app's value proposition pivoted on Manus; the landing page still validates
+  the original brief, and the pivot is recorded nowhere in this workflow.** Founder flagged it;
+  confirmed from `app/todo.md` ("Define the pivot target user, core job, and competitive promise",
+  done), `app/readiness-roadmap.md`, `app/server/trustLayer.ts` and the app's own UI copy. The
+  pivoted promise, in the roadmap's words: *"fewer, clearer alerts with enough evidence to decide
+  whether the offer is worth acting on."* The differentiator moved from *don't miss the drop* to
+  *don't get fooled by an incomplete or fake deal* — landed cost (shipping + tax), condition
+  (new vs. used/refurbished/open-box), availability, freshness (stale after 12h), seller, and a
+  confidence grade on every alert. Neither `00-brief.md`, `decisions.md`, nor this ledger mentions
+  it; per `CLAUDE.md` the brief wins on conflict, so the repo's official position is still the
+  pre-pivot product. Where the live page and the built app now disagree:
+
+  | Landing page says | App actually does | Kind |
+  |---|---|---|
+  | Plain-English alert, zero noise | Same | **Kept** — the acquisition hook is intact |
+  | "Know if it's really a deal" (price-history read) | Trust evidence: delivered cost, condition, availability, freshness | **Extended** — page gestures at it, app makes it the product |
+  | You name the stores ("at Amazon or Best Buy") | Automatic discovery; user never picks a store | Contradicted |
+  | Amazon + Best Buy at launch | Google Shopping, Amazon, **eBay** via PriceAPI — no Best Buy | Contradicted |
+  | "Instant alerts the moment a price crosses your line" (Pro) | Every six hours, for everyone | Contradicted |
+  | Basic: "1 store per alert", "Daily price checks"; Pro Plus: "Higher alert-check frequency" | No tiering exists; one cadence, all sources | Contradicted — the payment-intent test differentiates on features the app does not have |
+  | "DropWatch watches so you don't" | ADR-6: MVP ships with automated imports **disabled**, manual logging only | Contradicted by the architecture brief, not the pivot — pre-existing tension with `00-brief.md` |
+
+  Also divergent from the research: `01-price-data-sources.md` and `02-go-day-plan.md` planned
+  Keepa + the Best Buy API; the app went PriceAPI (Google Shopping/Amazon/eBay). The eBay source
+  is *why* condition filtering exists. Verdict for the probe: the top-of-funnel question the page
+  tests — will busy shoppers hand over an email for one quiet, exact alert — is unchanged by the
+  pivot, so the probe is still measuring the right hook. But the page now carries specific claims
+  the built product breaks, which is an honesty problem regardless of pivot (precedent: the
+  2026-08-22 Target correction, recorded distinct from the one performance iteration). The pivot
+  itself needs a founder decision and a line in `decisions.md`; on the founder queue.
 
 - 2026-09-01 — **Probe is starved, not failing; pre-marketing readiness audited.** Read directly
   from PostHog and Supabase, counting from 2026-08-23 as committed:
