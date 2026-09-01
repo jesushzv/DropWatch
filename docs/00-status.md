@@ -14,11 +14,44 @@
   share-kit posts with UTM-tagged links (`?utm_source=reddit|facebook|x|dm`) → `/validate-idea`
   converts the probe when the thresholds resolve (decide by 2026-09-12)
 
+## Founder queue — 2026-09-01
+
+> What only the founder can do or decide. Each item is dated when added; strike it with a date when
+> done. This block exists so the list survives the chat it was made in.
+
+**Do before spending on ads (about 30 minutes total):**
+
+- [ ] Send an email to `privacy@usedropwatch.com` from a separate account and confirm it arrives.
+      The Legal gate rests on the 2026-08-24 evidence in PR #15; this is the re-check.
+- [ ] Meta Events Manager → Test events: load the live page (expect `PageView`), submit a test
+      signup (expect `Lead`). Production has been rebuilt twice since the pixel was last confirmed
+      in the served bundle.
+- [ ] Fill out the Facebook page: profile, cover, About, 1–2 organic posts.
+- [ ] Click a link of the form `https://www.usedropwatch.com/?utm_source=test`, then confirm
+      PostHog shows `utm_source = test` on that pageview. No tagged traffic has ever reached the
+      site, so the attribution path is unexercised.
+- [ ] Merge PR #19 (canonical host + pricing-modal keyboard fix).
+- [ ] Ad and post links use **`https://www.usedropwatch.com/`** with the `www`, never the apex.
+
+**Decide (each is a founder call; the first is measurement, the rest spend the one copy iteration):**
+
+- [x] ~~Exclude `tier = 'Basic'` from the payment-intent numerator?~~ **Decided 2026-09-01: no —
+      count all tier clicks, as the threshold was written.** Pro + Pro Plus-only share is reported
+      alongside at the read as context, not as the gate.
+- [x] ~~Pro Plus pricing.~~ **Decided 2026-09-01: $99/year.** Shipped in the copy iteration.
+- [x] ~~"Watch every store at once" vs. two stores at launch.~~ **Decided 2026-09-01: Path B** —
+      honesty corrections plus the trust-evidence promise. The one copy iteration is spent.
+- [x] ~~Ratify or reject the app's pivot.~~ **Ratified 2026-09-01.** Recorded in `decisions.md`;
+      `00-brief.md` carries a dated addendum. The landing page now validates the pivoted promise.
+
+**Then:** launch ads and post the share-kit links. ~200 more visitors needed by 2026-09-12; zero
+channels are running.
+
 ## Gate ledger
 
 | Gate | Verdict | Date | Notes |
 |---|---|---|---|
-| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-01 the probe is starved:** 102 unique visitors, 0 non-founder signups, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry |
+| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-01 the probe is starved:** 102 unique visitors, 0 non-founder signups, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry. **Copy iteration spent 2026-09-01 (Path B, pivoted promise)** — see Waivers |
 | PRD | — | | brief covers scope; formalize with `/prd` post-GO. **Now an input gap:** the architecture brief had to be written against `00-brief.md` because `docs/product/02-prd.md` does not exist |
 | Positioning | — | | brief covers positioning; formalize post-GO |
 | Architecture | DONE | 2026-08-29 | `docs/engineering/01-architecture.md`. Verdict: keep the app as the MVP, do not rebuild (ADR-1), conditional on four cuts — Supabase Postgres + RLS (ADR-2), Supabase Auth (ADR-3), Anthropic direct (ADR-4), delete dead vendor surface (ADR-7). Hosting: Vercel serverless (ADR-5). MVP ships manual price logging only; PriceAPI imports built but disabled (ADR-6). **Written against `00-brief.md` — no PRD exists.** Brief only; nothing implemented, and nothing should be until the validation gate resolves |
@@ -64,6 +97,28 @@
 
 <!-- Every skipped gate or accepted risk gets a dated line here. Nothing is skipped silently. -->
 
+- 2026-09-01 — **The thresholds' one copy iteration is spent (founder-directed, Path B).** Spent at
+  102 visitors / 0 non-founder signups — before any read, so it is not the "between" iteration the
+  thresholds describe, but it is the same allowance and it is now used. What changed on the page:
+  honesty corrections for claims the pivoted app breaks (user-picked stores, Best Buy at launch,
+  "instant" alerts, tier features that do not exist) and the trust-evidence promise added to the
+  hero, how-it-works, demo alert, benefits, and two new FAQs; Pro Plus $129 → $99/year. Tier names
+  are unchanged so `tier_click` continuity holds. Ad copy in `marketing/ads/ads-kit.md` and the
+  creatives updated to match. **A second iteration requires a recorded waiver here.**
+
+- 2026-09-01 — **Founder-directed: ADR-2/3/4/5 build work starts ahead of the Validation gate.**
+  The gate is still PENDING PROBE and `docs/engineering/01-architecture.md` says nothing should be
+  implemented until it resolves, so this is a real waiver, not a technicality. Founder's call, made
+  with the probe read in hand (102 visitors, 0 non-founder signups, decision due 2026-09-12).
+  Scope of the waiver: the de-vendoring work only — Supabase Postgres + RLS (ADR-2), Supabase Auth
+  (ADR-3), Anthropic direct (ADR-4), Vercel serverless hosting (ADR-5), plus the owed
+  `/security-check`. It does **not** waive the gate itself: a KILL or PIVOT still stops the product,
+  and the migration is work that would be thrown away in that case. Accepted risk, stated plainly:
+  days of build spent on a product whose demand is unvalidated, while the thing the probe actually
+  needs is traffic. Running in a separate session (`session_01Eymusi4sEsSnVPC8VqvV8F`) on branch
+  `claude/dropwatch-adr-migration`, under a hard constraint that the live probe at the repo root is
+  never touched.
+
 - 2026-08-22 — Founder supplied a finished external validation brief (idea, positioning, design
   system, copy, pricing — all decided) and directed a straight build of the validation landing
   page. In-repo Stage 0–2 artifacts and gates waived by founder; the landing page IS the
@@ -81,6 +136,48 @@
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-01 — **Pivot ratified; landing page rewritten to validate it; copy iteration spent.**
+  Founder decisions, all four in one sitting: (1) ratify the trust-evidence pivot — recorded in
+  `decisions.md`, addendum on `00-brief.md`; (2) Basic-tier clicks keep counting toward payment
+  intent as the threshold was written; (3) landing page takes Path B — honesty corrections plus the
+  pivoted promise; (4) Pro Plus $99/year. The page now says what the app does: automatic discovery
+  across Amazon, eBay and Google Shopping (no store picking), six-hour checks framed honestly,
+  every alert carrying delivered price, condition, stock, seller and freshness, and a demo alert
+  that shows exactly that evidence line. Meta description, ad copy and the ad creatives updated to
+  match so the destination and the ad tell the same story. Verified: `tsc -b` clean, `vite build`
+  clean, new copy present in `dist/index.html`.
+
+- 2026-09-01 — **The app's value proposition pivoted on Manus; the landing page still validates
+  the original brief, and the pivot is recorded nowhere in this workflow.** Founder flagged it;
+  confirmed from `app/todo.md` ("Define the pivot target user, core job, and competitive promise",
+  done), `app/readiness-roadmap.md`, `app/server/trustLayer.ts` and the app's own UI copy. The
+  pivoted promise, in the roadmap's words: *"fewer, clearer alerts with enough evidence to decide
+  whether the offer is worth acting on."* The differentiator moved from *don't miss the drop* to
+  *don't get fooled by an incomplete or fake deal* — landed cost (shipping + tax), condition
+  (new vs. used/refurbished/open-box), availability, freshness (stale after 12h), seller, and a
+  confidence grade on every alert. Neither `00-brief.md`, `decisions.md`, nor this ledger mentions
+  it; per `CLAUDE.md` the brief wins on conflict, so the repo's official position is still the
+  pre-pivot product. Where the live page and the built app now disagree:
+
+  | Landing page says | App actually does | Kind |
+  |---|---|---|
+  | Plain-English alert, zero noise | Same | **Kept** — the acquisition hook is intact |
+  | "Know if it's really a deal" (price-history read) | Trust evidence: delivered cost, condition, availability, freshness | **Extended** — page gestures at it, app makes it the product |
+  | You name the stores ("at Amazon or Best Buy") | Automatic discovery; user never picks a store | Contradicted |
+  | Amazon + Best Buy at launch | Google Shopping, Amazon, **eBay** via PriceAPI — no Best Buy | Contradicted |
+  | "Instant alerts the moment a price crosses your line" (Pro) | Every six hours, for everyone | Contradicted |
+  | Basic: "1 store per alert", "Daily price checks"; Pro Plus: "Higher alert-check frequency" | No tiering exists; one cadence, all sources | Contradicted — the payment-intent test differentiates on features the app does not have |
+  | "DropWatch watches so you don't" | ADR-6: MVP ships with automated imports **disabled**, manual logging only | Contradicted by the architecture brief, not the pivot — pre-existing tension with `00-brief.md` |
+
+  Also divergent from the research: `01-price-data-sources.md` and `02-go-day-plan.md` planned
+  Keepa + the Best Buy API; the app went PriceAPI (Google Shopping/Amazon/eBay). The eBay source
+  is *why* condition filtering exists. Verdict for the probe: the top-of-funnel question the page
+  tests — will busy shoppers hand over an email for one quiet, exact alert — is unchanged by the
+  pivot, so the probe is still measuring the right hook. But the page now carries specific claims
+  the built product breaks, which is an honesty problem regardless of pivot (precedent: the
+  2026-08-22 Target correction, recorded distinct from the one performance iteration). The pivot
+  itself needs a founder decision and a line in `decisions.md`; on the founder queue.
 
 - 2026-09-01 — **Probe is starved, not failing; pre-marketing readiness audited.** Read directly
   from PostHog and Supabase, counting from 2026-08-23 as committed:

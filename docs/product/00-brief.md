@@ -4,6 +4,31 @@
 > below is made; the landing page implements it verbatim. **If anything in this repo conflicts
 > with this brief, the brief wins.** [FACT: founder-supplied; decisions not re-derived here.]
 
+## Pivot addendum — 2026-09-01 (supersedes conflicting lines below)
+
+> [FACT: founder ratified 2026-09-01; recorded in `docs/knowledge/decisions.md`.] While building the
+> app on Manus the founder pivoted its value proposition. The brief below is kept verbatim as the
+> original; where this addendum and the body disagree, **the addendum wins.**
+
+- **Differentiator:** the trust-evidence alert. Every alert states the delivered price (shipping and
+  tax when the store publishes them; "unknown" otherwise, never a silent $0), the condition (new by
+  default; used, refurbished and open-box excluded unless the user opts in), availability,
+  freshness (an offer older than 12 hours is stale and suppressed), the seller, and a confidence
+  grade. In the app roadmap's words: *fewer, clearer alerts with enough evidence to decide whether
+  the offer is worth acting on.* The job moved from "don't miss the drop" to "don't get fooled by a
+  deal that isn't real." The acquisition hook — one quiet, exact, plain-English alert — is unchanged.
+- **Stores:** automatic discovery across Google Shopping's merchants, Amazon and eBay via PriceAPI.
+  The user never picks a store. Best Buy is *not* a launch source (supersedes "Amazon and Best Buy at
+  launch"); it joins Target and Walmart on the founding-user ballot for dedicated integrations.
+- **Cadence:** every six hours, not instant (supersedes "the second it drops"). The landing page
+  positions this honestly: built for drops that last days, not flash sales that last minutes.
+- **Alert basis:** item price, estimated delivered total, or verified delivered total, chosen per
+  watch; an optional destination ZIP is context only until the provider supplies shipping and tax.
+- **Pricing on the page:** Pro Plus is $99/year (supersedes both $129/year and $12.99/month). Tiers
+  are a willingness-to-pay hypothesis; the app has no tiering built.
+- **Still true:** Plain-English Alert Builder as the hero, the target user, the positioning against
+  noise, the demo-moment structure, the design system and voice.
+
 ## Product context
 
 DropWatch is a deal-alert app for busy professionals (25–40) who shop online constantly but

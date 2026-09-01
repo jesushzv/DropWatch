@@ -18,9 +18,10 @@ separately, and paid must not blend with organic).
   "One plain-English price alert. Zero noise. Get pinged the second your price hits — never a
   deal blast. Early access + 3 months of Pro free ↓"
 - **About (FB):**
-  "DropWatch watches one exact thing at one exact price — 'Sony XM5s under $250, Amazon or Best
-  Buy' — and only speaks when it drops. No feed, no coupon clutter, no daily 'hot deals' email.
-  Launching soon; founding users get early access and 3 months of Pro free."
+  "DropWatch watches one exact thing at one exact price — 'Sony XM5s under $250, new, delivered'
+  — and only speaks when it really drops: delivered price, condition, in stock. No feed, no
+  coupon clutter, no daily 'hot deals' email. Launching soon; founding users get early access
+  and 3 months of Pro free."
 
 ## Ad copy (mix & match with any creative)
 
@@ -29,9 +30,10 @@ chars; description ≤30 chars. CTA button: **Sign up**.
 
 **Primary text**
 1. "The price dropped on a Tuesday. It was back up by Thursday. You found out Friday. DropWatch
-   sends one alert the second your price hits — and nothing else, ever." (A/C)
-2. "Type 'AirPods Pro under $200' and you're done. One alert when it drops, across Amazon,
-   Target, and Best Buy. No deal blasts, no coupon clutter." (B)
+   sends one alert when your price hits — and nothing else, ever." (A/C)
+2. "Type 'AirPods Pro under $200' and you're done. One alert when it drops — new, in stock,
+   delivered price — across Amazon, eBay, and Google Shopping. No deal blasts, no coupon
+   clutter." (B)
 3. "Free deal tools earn on volume, so they bury the one thing you want under 200 you don't.
    DropWatch is the opposite: one exact thing, one exact price, one alert." (C)
 

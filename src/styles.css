@@ -413,6 +413,10 @@ li {
   font-weight: 600;
 }
 
+.notif__evidence {
+  color: var(--text-muted);
+}
+
 .notif__read {
   color: var(--text-muted);
 }
