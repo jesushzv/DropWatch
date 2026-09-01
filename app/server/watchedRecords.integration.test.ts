@@ -3,12 +3,12 @@ import { afterAll, describe, expect, it } from "vitest";
 import { users, watchEvents, watchedRecords } from "../drizzle/schema";
 import {
   createWatchedRecord,
-  getDb,
   getWatchedRecordDetail,
   listWatchedRecords,
   logPrice,
   setWatchedRecordStatus,
   softDeleteWatchedRecord,
+  withServiceContext,
 } from "./db";
 
 const integration = process.env.DATABASE_URL ? describe : describe.skip;
@@ -17,22 +17,26 @@ let userId: number | undefined;
 
 integration("watched-record persistence", () => {
   afterAll(async () => {
-    if (!userId) return;
-    const database = await getDb();
-    await database?.delete(users).where(eq(users.id, userId));
+    const uid = userId;
+    if (!uid) return;
+    await withServiceContext(async tx => {
+      await tx.delete(users).where(eq(users.id, uid));
+    });
   });
 
   it("persists an alert, price history, threshold trigger, event history, and soft deletion", async () => {
-    const database = await getDb();
-    if (!database) throw new Error("Database is unavailable for integration testing.");
-
-    const inserted = await database.insert(users).values({
-      openId,
-      name: "DropWatch Integration Test",
-      role: "user",
-      lastSignedIn: new Date(),
-    });
-    userId = Number(inserted[0].insertId);
+    const inserted = await withServiceContext(tx =>
+      tx
+        .insert(users)
+        .values({
+          openId,
+          name: "DropWatch Integration Test",
+          role: "user",
+          lastSignedIn: new Date(),
+        })
+        .returning({ id: users.id }),
+    );
+    userId = inserted[0].id;
 
     const created = await createWatchedRecord({
       userId,
@@ -66,14 +70,19 @@ integration("watched-record persistence", () => {
     expect(await softDeleteWatchedRecord(userId, recordId)).toBe(true);
     expect(await listWatchedRecords(userId)).toEqual([]);
 
-    const persisted = await database
-      .select({ status: watchedRecords.status, deletedAt: watchedRecords.deletedAt })
-      .from(watchedRecords)
-      .where(and(eq(watchedRecords.id, recordId), eq(watchedRecords.userId, userId)));
+    const uid = userId;
+    const persisted = await withServiceContext(tx =>
+      tx
+        .select({ status: watchedRecords.status, deletedAt: watchedRecords.deletedAt })
+        .from(watchedRecords)
+        .where(and(eq(watchedRecords.id, recordId), eq(watchedRecords.userId, uid))),
+    );
     expect(persisted[0]?.status).toBe("deleted");
     expect(persisted[0]?.deletedAt).toBeInstanceOf(Date);
 
-    const events = await database.select().from(watchEvents).where(eq(watchEvents.watchedRecordId, recordId));
+    const events = await withServiceContext(tx =>
+      tx.select().from(watchEvents).where(eq(watchEvents.watchedRecordId, recordId)),
+    );
     expect(events.map(event => event.eventType)).toEqual(expect.arrayContaining(["created", "price_logged", "threshold_met", "paused", "deleted"]));
 
     const hiddenDetail = await getWatchedRecordDetail(userId, recordId);
