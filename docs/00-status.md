@@ -64,6 +64,19 @@
 
 <!-- Every skipped gate or accepted risk gets a dated line here. Nothing is skipped silently. -->
 
+- 2026-09-01 — **Founder-directed: ADR-2/3/4/5 build work starts ahead of the Validation gate.**
+  The gate is still PENDING PROBE and `docs/engineering/01-architecture.md` says nothing should be
+  implemented until it resolves, so this is a real waiver, not a technicality. Founder's call, made
+  with the probe read in hand (102 visitors, 0 non-founder signups, decision due 2026-09-12).
+  Scope of the waiver: the de-vendoring work only — Supabase Postgres + RLS (ADR-2), Supabase Auth
+  (ADR-3), Anthropic direct (ADR-4), Vercel serverless hosting (ADR-5), plus the owed
+  `/security-check`. It does **not** waive the gate itself: a KILL or PIVOT still stops the product,
+  and the migration is work that would be thrown away in that case. Accepted risk, stated plainly:
+  days of build spent on a product whose demand is unvalidated, while the thing the probe actually
+  needs is traffic. Running in a separate session (`session_01Eymusi4sEsSnVPC8VqvV8F`) on branch
+  `claude/dropwatch-adr-migration`, under a hard constraint that the live probe at the repo root is
+  never touched.
+
 - 2026-08-22 — Founder supplied a finished external validation brief (idea, positioning, design
   system, copy, pricing — all decided) and directed a straight build of the validation landing
   page. In-repo Stage 0–2 artifacts and gates waived by founder; the landing page IS the
