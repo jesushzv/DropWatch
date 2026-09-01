@@ -47,8 +47,9 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
   near-miss on the whole ad budget.
 - **Apex redirects to `www`:** `https://usedropwatch.com/` 308-redirects to
   `https://www.usedropwatch.com/`. Both hosts are in `PRODUCTION_HOSTS`, so analytics fires either
-  way, but note the canonical URL in `index.html` (`og:url`) is the apex while pages are served
-  from `www`.
+  way. `www` is the canonical host: `<link rel="canonical">`, `og:url` and the social image URLs in
+  `index.html` all name `www`, and ad/post links should too (skips the redirect hop and keeps
+  `?utm_source=` intact).
 
 ## Engineering bar (proportionate to a solo shop)
 
