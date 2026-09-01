@@ -22,13 +22,13 @@ const BENEFITS = [
   },
   {
     icon: <StorefrontsIcon />,
-    title: "Watch every store at once.",
-    body: "One alert covers Amazon, Best Buy, and more — no tab-hopping.",
+    title: "One alert, every supported store.",
+    body: "DropWatch searches Amazon, eBay, and the merchants on Google Shopping for you — no picking stores, no tab-hopping.",
   },
   {
     icon: <DipChartIcon />,
     title: "Know if it's really a deal.",
-    body: "Price history shows whether $248 is a genuine low or a fake markdown.",
+    body: "Every alert shows the delivered price, the condition, whether it's in stock, and how the price compares to its history — so a used unit with $40 shipping never reaches you as a \"deal.\"",
   },
   {
     icon: <TargetArrowIcon />,
@@ -53,7 +53,11 @@ const TIERS = [
     price: "Free",
     priceNote: "",
     best: "Best for: trying DropWatch on the one thing you're waiting on.",
-    features: ["3 active alerts", "1 store per alert", "Daily price checks", "Email alerts"],
+    features: [
+      "3 active alerts",
+      "Daily checks across all supported stores",
+      "Email alerts with condition and stock status",
+    ],
     recommended: false,
   },
   {
@@ -63,22 +67,22 @@ const TIERS = [
     best: "Best for: anyone with a real wishlist across more than one store.",
     features: [
       "Unlimited alerts",
-      "All supported stores per alert",
-      "Instant alerts the moment a price crosses your line",
+      "Checks every 6 hours, not once a day",
+      "Delivered-price alerts — shipping and tax counted, never guessed",
       "Full price history and deal-quality reads",
     ],
     recommended: true,
   },
   {
     name: "Pro Plus",
-    price: "$129",
+    price: "$99",
     priceNote: "/year",
-    best: "Best for: heavy shoppers who want first access and fast answers.",
+    best: "Best for: anyone who's already sure — two months free.",
     features: [
       "Everything in Pro",
+      "Two months free vs. paying monthly",
       "Priority support",
       "Early access to new stores and features",
-      "Higher alert-check frequency",
     ],
     recommended: false,
   },
@@ -91,7 +95,7 @@ const FAQS = [
   },
   {
     q: "Why would I pay when Honey and CamelCamelCamel are free?",
-    a: "Free tools make money from ads and affiliate volume, so they're built to show you more deals, not fewer. DropWatch is built for the opposite: one alert for one exact thing. You're paying for silence and precision.",
+    a: "Free tools make money from ads and affiliate volume, so they're built to show you more deals, not fewer. DropWatch is built for the opposite: one alert for one exact thing — and it checks the deal is real (new, in stock, delivered price) before it tells you. You're paying for silence and precision.",
   },
   {
     q: "Do I have to connect my Amazon or store accounts?",
@@ -99,11 +103,19 @@ const FAQS = [
   },
   {
     q: "How long does setup take?",
-    a: 'About as long as sending a text. Type "Patagonia Nano Puff, 40% off, any store" and you\'re done. Most people set up their first three alerts in under two minutes.',
+    a: 'About as long as sending a text. Type "Patagonia Nano Puff, 40% off, new" and you\'re done — DropWatch finds the stores. Most people set up their first three alerts in under two minutes.',
   },
   {
     q: "Which stores will it cover?",
-    a: "At launch: Amazon and Best Buy. Founding users vote on what comes next — Target, Walmart, and more are on the ballot, and early-access signups decide the order.",
+    a: "At launch: Amazon, eBay, and the merchants listed on Google Shopping — DropWatch searches them all for you, so you never pick a store. Founding users vote on which dedicated store integrations come next; Best Buy, Target, and Walmart are on the ballot, and early-access signups decide the order.",
+  },
+  {
+    q: "How do I know the deal is real?",
+    a: "Every alert shows what DropWatch actually found: the delivered price with shipping and tax when the store publishes them (and \"unknown\" when it doesn't — never a silent $0), whether it's new or used, whether it's in stock, who's selling it, and when the price was last seen. Used, refurbished, and open-box listings are left out unless you ask for them.",
+  },
+  {
+    q: "How fast are alerts?",
+    a: "DropWatch checks every supported store every six hours (once a day on the free plan) and emails you the same hour a price crosses your line. It's built for the drops that last days, not the flash sales that last minutes — those are the ones that make you check your phone all day.",
   },
   {
     q: "Will you spam me?",
@@ -186,8 +198,9 @@ export default function App() {
               </Reveal>
               <Reveal delay={60}>
                 <p className="hero__sub">
-                  For busy people who shop online but can't babysit prices — set one alert, get
-                  pinged the second it drops.
+                  For busy people who shop online but can't babysit prices — set one alert in
+                  plain English and get one message when it really drops: delivered price,
+                  condition, in stock. No noise.
                 </p>
               </Reveal>
               <Reveal delay={120}>
@@ -195,8 +208,8 @@ export default function App() {
               </Reveal>
               <Reveal delay={180}>
                 <p className="hero__credibility small">
-                  The deals worth waiting for usually last hours, not days — and they drop while
-                  you're at work.
+                  Most "deals" aren't: a used unit, surprise shipping, out of stock by the time
+                  you click. DropWatch checks before it tells you.
                 </p>
               </Reveal>
             </div>
@@ -217,6 +230,7 @@ export default function App() {
                 "Your wishlist is a graveyard. You saved that laptop three weeks ago, the price dropped 30% on a Tuesday, and it was back up by Thursday.",
                 "Deal apps and coupon extensions bury the one thing you want under two hundred things you don't.",
                 "Checking prices across Amazon, Target, and Best Buy is a part-time job you didn't apply for.",
+                "And when a \"deal\" finally shows up, it's a refurbished unit from a third-party seller, plus $40 shipping.",
                 "So you either overpay out of impatience, or wait forever and miss the window anyway.",
               ].map((line, i) => (
                 <Reveal as="li" key={i} delay={i * 60}>
@@ -237,15 +251,15 @@ export default function App() {
               {[
                 {
                   title: "Say what you want, in plain English.",
-                  body: 'Type "AirPods Pro under $200" and DropWatch turns it into a tracked alert — product, stores, and target price, no forms to fill.',
+                  body: 'Type "AirPods Pro under $200" and DropWatch turns it into a tracked alert — product and target price, no forms, no store menus.',
                 },
                 {
                   title: "DropWatch watches so you don't.",
-                  body: 'Your alerts sit quietly across the stores you picked. No feed, no digest, no daily "hot deals" email.',
+                  body: 'DropWatch checks every supported store for you, every few hours. No feed, no digest, no daily "hot deals" email.',
                 },
                 {
                   title: "Get one alert when it actually drops.",
-                  body: "The moment your price hits, you get a single notification with the price, the store, and a read on whether it's a real deal.",
+                  body: "When your price hits, you get one email with the price, the delivered cost, the seller and condition, and a read on whether it's a real deal — or a used unit with $40 shipping.",
                 },
               ].map((step, i) => (
                 <Reveal className="step" key={i} delay={i * 60}>
@@ -272,8 +286,7 @@ export default function App() {
               <Reveal className="demo__card demo__card--you">
                 <div className="demo__label">You type this once</div>
                 <p className="demo__bubble">
-                  Sony WH-1000XM5 headphones — tell me if they drop under $250 at Amazon or Best
-                  Buy.
+                  Sony WH-1000XM5 headphones — tell me when they're under $250, new, delivered.
                 </p>
               </Reveal>
               <Reveal className="demo__card demo__card--alert" delay={80}>
@@ -281,11 +294,16 @@ export default function App() {
                 <div className="notif">
                   <div className="notif__title">PRICE DROP — Sony WH-1000XM5</div>
                   <p className="notif__price">
-                    <strong>$248.00</strong> at Best Buy · was $348.00 (29% off)
+                    <strong>$248.00</strong> at Amazon · was $348.00 (29% off)
+                  </p>
+                  <p className="notif__evidence small">
+                    Delivered $248.00 (free shipping, tax est.) · New · In stock · Sold by Amazon ·
+                    Seen 20 min ago
                   </p>
                   <p>Lowest price in 6 months. Your target was $250.</p>
                   <p className="notif__read">
-                    Deal read: Below its Black Friday price. This is the buy window.
+                    Deal read: Below its Black Friday price, new from the retailer itself — not a
+                    refurb from a marketplace seller. This is the buy window.
                   </p>
                   <div className="notif__actions" aria-hidden="true">
                     <span className="btn btn--primary">View deal</span>

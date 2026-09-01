@@ -35,14 +35,14 @@
 
 **Decide (each is a founder call; the first is measurement, the rest spend the one copy iteration):**
 
-- [ ] **Exclude `tier = 'Basic'` from the payment-intent numerator?** The "≥20% of signups via a
-      pricing-tier button" threshold reads as willingness to pay, but the Free plan has an
-      identical button. Recommended: yes. Decide before traffic, not after.
-- [ ] **Pro Plus pricing.** $9.99/mo × 12 = $119.88; Pro Plus is $129/yr. The upgrade costs more
-      than the plan it sits above. Change, or leave and accept the read?
-- [ ] **"Watch every store at once"** vs. two stores at launch. Soften, or leave?
-- [ ] **Ratify or reject the app's pivot** (see the 2026-09-01 pivot entry in the log) and decide
-      whether the landing page should validate the pivoted promise or the original one.
+- [x] ~~Exclude `tier = 'Basic'` from the payment-intent numerator?~~ **Decided 2026-09-01: no —
+      count all tier clicks, as the threshold was written.** Pro + Pro Plus-only share is reported
+      alongside at the read as context, not as the gate.
+- [x] ~~Pro Plus pricing.~~ **Decided 2026-09-01: $99/year.** Shipped in the copy iteration.
+- [x] ~~"Watch every store at once" vs. two stores at launch.~~ **Decided 2026-09-01: Path B** —
+      honesty corrections plus the trust-evidence promise. The one copy iteration is spent.
+- [x] ~~Ratify or reject the app's pivot.~~ **Ratified 2026-09-01.** Recorded in `decisions.md`;
+      `00-brief.md` carries a dated addendum. The landing page now validates the pivoted promise.
 
 **Then:** launch ads and post the share-kit links. ~200 more visitors needed by 2026-09-12; zero
 channels are running.
@@ -51,7 +51,7 @@ channels are running.
 
 | Gate | Verdict | Date | Notes |
 |---|---|---|---|
-| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-01 the probe is starved:** 102 unique visitors, 0 non-founder signups, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry |
+| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-01 the probe is starved:** 102 unique visitors, 0 non-founder signups, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry. **Copy iteration spent 2026-09-01 (Path B, pivoted promise)** — see Waivers |
 | PRD | — | | brief covers scope; formalize with `/prd` post-GO. **Now an input gap:** the architecture brief had to be written against `00-brief.md` because `docs/product/02-prd.md` does not exist |
 | Positioning | — | | brief covers positioning; formalize post-GO |
 | Architecture | DONE | 2026-08-29 | `docs/engineering/01-architecture.md`. Verdict: keep the app as the MVP, do not rebuild (ADR-1), conditional on four cuts — Supabase Postgres + RLS (ADR-2), Supabase Auth (ADR-3), Anthropic direct (ADR-4), delete dead vendor surface (ADR-7). Hosting: Vercel serverless (ADR-5). MVP ships manual price logging only; PriceAPI imports built but disabled (ADR-6). **Written against `00-brief.md` — no PRD exists.** Brief only; nothing implemented, and nothing should be until the validation gate resolves |
@@ -97,6 +97,15 @@ channels are running.
 
 <!-- Every skipped gate or accepted risk gets a dated line here. Nothing is skipped silently. -->
 
+- 2026-09-01 — **The thresholds' one copy iteration is spent (founder-directed, Path B).** Spent at
+  102 visitors / 0 non-founder signups — before any read, so it is not the "between" iteration the
+  thresholds describe, but it is the same allowance and it is now used. What changed on the page:
+  honesty corrections for claims the pivoted app breaks (user-picked stores, Best Buy at launch,
+  "instant" alerts, tier features that do not exist) and the trust-evidence promise added to the
+  hero, how-it-works, demo alert, benefits, and two new FAQs; Pro Plus $129 → $99/year. Tier names
+  are unchanged so `tier_click` continuity holds. Ad copy in `marketing/ads/ads-kit.md` and the
+  creatives updated to match. **A second iteration requires a recorded waiver here.**
+
 - 2026-09-01 — **Founder-directed: ADR-2/3/4/5 build work starts ahead of the Validation gate.**
   The gate is still PENDING PROBE and `docs/engineering/01-architecture.md` says nothing should be
   implemented until it resolves, so this is a real waiver, not a technicality. Founder's call, made
@@ -127,6 +136,17 @@ channels are running.
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-01 — **Pivot ratified; landing page rewritten to validate it; copy iteration spent.**
+  Founder decisions, all four in one sitting: (1) ratify the trust-evidence pivot — recorded in
+  `decisions.md`, addendum on `00-brief.md`; (2) Basic-tier clicks keep counting toward payment
+  intent as the threshold was written; (3) landing page takes Path B — honesty corrections plus the
+  pivoted promise; (4) Pro Plus $99/year. The page now says what the app does: automatic discovery
+  across Amazon, eBay and Google Shopping (no store picking), six-hour checks framed honestly,
+  every alert carrying delivered price, condition, stock, seller and freshness, and a demo alert
+  that shows exactly that evidence line. Meta description, ad copy and the ad creatives updated to
+  match so the destination and the ad tell the same story. Verified: `tsc -b` clean, `vite build`
+  clean, new copy present in `dist/index.html`.
 
 - 2026-09-01 — **The app's value proposition pivoted on Manus; the landing page still validates
   the original brief, and the pivot is recorded nowhere in this workflow.** Founder flagged it;
