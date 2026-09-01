@@ -58,7 +58,18 @@ integration("persisted trust layer", () => {
     const observationDetail = await getWatchedRecordDetail(pipelineUserId, observation.record.id);
     const staleDetail = await getWatchedRecordDetail(pipelineUserId, stale.record.id);
     expect(observationDetail?.events.some(event => event.eventType === "email_skipped")).toBe(true);
-    expect(staleDetail?.prices).toHaveLength(0);
+    // The stale offer ($399.99, under the $500 target) is kept as graded
+    // history but must never alert: no trigger, no threshold_met, no email.
+    // (An earlier version asserted zero price entries, which only held because
+    // the Manus gateway's model-list fetch consumed the stubbed stale response
+    // before the download ran — the staleness filter itself was never
+    // exercised. These assertions test the real suppression contract in
+    // offerMeetsAlertBasis.)
+    expect(staleDetail?.prices).toHaveLength(1);
+    expect(staleDetail?.prices[0]).toMatchObject({ freshnessState: "stale" });
+    expect(staleDetail?.record.status).toBe("active");
+    expect(staleDetail?.events.some(event => event.eventType === "threshold_met")).toBe(false);
+    expect(staleDetail?.events.some(event => event.eventType.startsWith("email_"))).toBe(false);
     await deleteTestUser(pipelineUserId);
   });
 
