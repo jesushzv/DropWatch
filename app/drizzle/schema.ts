@@ -158,6 +158,25 @@ export const priceImportJobs = pgTable(
   table => [index("price_import_jobs_record_status_idx").on(table.watchedRecordId, table.status)],
 );
 
+/**
+ * Per-user abuse/spend counters (security gate 2026-09-01). One row per
+ * (user, kind, window); the window is a UTC day ("2026-09-01") or hour
+ * ("2026-09-01T14") prefix depending on the limit being enforced.
+ */
+export const usageCounters = pgTable(
+  "usageCounters",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+    kind: varchar("kind", { length: 32 }).notNull(),
+    window: varchar("window", { length: 16 }).notNull(),
+    count: integer("count").notNull().default(0),
+    createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull().$onUpdate(() => new Date()),
+  },
+  table => [uniqueIndex("usage_counters_user_kind_window_idx").on(table.userId, table.kind, table.window)],
+);
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type WatchedRecord = typeof watchedRecords.$inferSelect;
@@ -166,3 +185,4 @@ export type WatchEvent = typeof watchEvents.$inferSelect;
 export type PriceImportSchedule = typeof priceImportSchedules.$inferSelect;
 export type PriceImportJob = typeof priceImportJobs.$inferSelect;
 export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type UsageCounter = typeof usageCounters.$inferSelect;

@@ -5,6 +5,7 @@ import postgres from "postgres";
 import {
   InsertUser,
   notificationPreferences,
+  usageCounters,
   NotificationPreference,
   priceEntries,
   priceImportJobs,
@@ -582,6 +583,34 @@ export async function unsubscribePriceAlertEmails(token: string) {
     if (!preference) return false;
     await tx.update(notificationPreferences).set({ priceAlertEmails: false, unsubscribedAt: new Date() }).where(eq(notificationPreferences.id, preference.id));
     return true;
+  });
+}
+
+/**
+ * Atomically bumps a per-user abuse/spend counter and returns the new count,
+ * so callers can enforce a cap with one round trip (security gate 2026-09-01).
+ */
+export async function incrementUsage(userId: number, kind: string, window: string): Promise<number> {
+  return withUserContext(userId, async tx => {
+    const rows = await tx
+      .insert(usageCounters)
+      .values({ userId, kind, window, count: 1 })
+      .onConflictDoUpdate({
+        target: [usageCounters.userId, usageCounters.kind, usageCounters.window],
+        set: { count: sql`${usageCounters.count} + 1` },
+      })
+      .returning({ count: usageCounters.count });
+    return rows[0].count;
+  });
+}
+
+export async function countActiveWatchedRecords(userId: number): Promise<number> {
+  return withUserContext(userId, async tx => {
+    const rows = await tx
+      .select({ id: watchedRecords.id })
+      .from(watchedRecords)
+      .where(and(eq(watchedRecords.userId, userId), ne(watchedRecords.status, "deleted")));
+    return rows.length;
   });
 }
 

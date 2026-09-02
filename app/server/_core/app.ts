@@ -21,8 +21,10 @@ import { isValidPriceWebhookSignature, processPriceApiWebhook, requestPriceImpor
 export function createApp() {
   const app = express();
   app.set("trust proxy", 1);
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // 1mb is generous for every real payload this app accepts (tRPC JSON,
+  // webhook callbacks, auth exchanges); large limits were an inherited default.
+  app.use(express.json({ limit: "1mb" }));
+  app.use(express.urlencoded({ limit: "1mb", extended: true }));
   registerStorageProxy(app);
   registerSupabaseAuthRoutes(app);
   registerTestAuthRoute(app, { upsertUser: db.upsertUser, createSessionToken: sdk.createSessionToken.bind(sdk) });

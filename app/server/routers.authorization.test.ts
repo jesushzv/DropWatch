@@ -16,6 +16,8 @@ vi.mock("./db", () => ({
   setPriceAlertEmailPreference: vi.fn(),
   listImportHealth: vi.fn(),
   getPilotMetrics: vi.fn(),
+  incrementUsage: vi.fn(async () => 1),
+  countActiveWatchedRecords: vi.fn(async () => 0),
 }));
 
 vi.mock("./watchAi", () => ({
