@@ -5,13 +5,15 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-09-01
+- **Last updated:** 2026-09-02 (probe: traffic rollout started; ADR-2/3/4/5 + app security gate
+  merged to main in PR #23)
 - **Next command:** **launch — rolling out per `marketing/launch-rollout.md`** (2026-09-02). Day 0:
-  fix the Facebook post link, build the Meta Traffic campaign from `marketing/ads/ads-kit.md`, post
-  X/LinkedIn + DMs from `marketing/share-kit.md`. Day 1+: community posts. A daily 14:00 UTC routine
-  reports channel counts. Stop spend 2026-09-12 → `/validate-idea` reads the thresholds with the
-  host filter and founder-traffic discount applied (~210 more production-host visitors needed for
-  the 300 floor)
+  fix the Facebook post link, build the Meta Traffic campaign from `marketing/ads/campaign-setup.md`,
+  post X/LinkedIn + DMs from `marketing/share-kit.md`. Day 1+: community posts. A daily 14:00 UTC
+  routine reports channel counts. Stop spend 2026-09-12 → `/validate-idea` reads the thresholds with
+  the host filter and founder-traffic discount applied (~210 more production-host visitors needed
+  for the 300 floor). App side: PR #23's four founder steps before first deploy are listed in that
+  PR; not on the probe's critical path.
 
 ## Founder queue — 2026-09-01
 
@@ -68,7 +70,7 @@ channels are running.
 | Build plan | — | | phases: 0/0 complete |
 | CI pipeline | SET UP | 2026-08-29 | `.github/workflows/ci.yml`: landing-page job (build + asserts root-relative asset base) and app job (typecheck, test, build + asserts vendor runtime stays out of the bundle). Runs a MySQL service so the six integration suites execute rather than skip — **112 passed / 2 skipped in CI**, vs 105/9 without a database — and fails the job if an integration suite skips, so a broken database cannot look green. Job timeouts and concurrency cancellation set. Added while reviewing PR #16; the repo had no CI before |
 | Review | RESOLVED | 2026-08-29 | Full review of PR #16 found it would have taken production down — verified on its own Vercel preview that `/` served the bundled Express server as text/plain and `/landing-page/` 404'd. Fixes in #17 (merged into #16, then #16 → main, commit 0c8ec66): landing restored to the root, app moved to `app/`, 6 security fixes, suite made hermetic (8 failures → 0), production HTML 368 kB → 826 B, initial JS 929 → 531 kB, CI added. Production re-verified after merge: landing page at `/`, `/privacy` 200, Meta Pixel and `dropwatch_leads` capture intact. Follow-up in PR #18 closed the coverage gaps: **50 → 112 tests**, adding router authorization coverage (every protected procedure rejects anonymous callers; row ownership comes from the session, never from input) and covering the six security fixes. Each new suite was mutation-tested. Still owed: `/security-check`, and eslint/prettier which have no CI gate |
-| Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22. App scope not yet gated — `/security-check` is owed before `app/` ships. Fixed while reviewing PR #16: unauthenticated storage proxy, non-expiring provider callback signature, SameSite=None session cookie, missing appId check, test-auth reachable with NODE_ENV unset, state-changing GET unsubscribe |
+| Security | PASS (app scope) | 2026-09-02 | `/security-check` ran for app scope on `claude/dropwatch-adr-migration`: FAIL on one blocking finding (no rate limiting on the paid-API procedures behind open self-signup) → fixed with per-user usage caps + negative tests → scoped adversarial re-review PASS. Full record: `docs/engineering/04-security.md`. Landing scope unchanged (RLS insert-only on `dropwatch_leads`, 2026-08-22). Accepted risks listed in the artifact — the two founder-actionable ones: confirm Supabase Auth rate limits before launch, and execute ADR-7 (dead vendor surface) soon |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
 | Legal (first deploy) | PASS | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. `privacy@usedropwatch.com` forwarding via ImprovMX (MX + SPF TXT confirmed live in DNS 2026-08-24); founder confirmed a test email sent from a separate account was received. |
@@ -215,6 +217,87 @@ channels are running.
   test signup was submitted on production, so the Meta `Lead` event is unproven. Both are recorded
   as open in the founder queue. The Facebook click is founder traffic and is discounted from the
   probe.
+
+- 2026-09-02 — **PR #23 check fix: Vercel cron cadence dropped to daily (Hobby-plan cap).** The
+  `dropwatch-app` deployment failed because `app/vercel.json` declared a six-hourly cron
+  (`0 */6 * * *`) and the Vercel account is on Hobby, which allows only once-daily crons — my branch
+  is the first to add `app/vercel.json`, so it was the first to hit it. Changed the platform cron and
+  `PRICE_IMPORT_CRON` to `0 8 * * *` (daily); flagged as an ADR-5 deviation in `decisions.md`. No
+  product impact: ADR-6 keeps imports disabled for the MVP, so the cron does nothing at launch, and
+  the six-hourly cadence in the product spec is restored the day the account moves to Pro. GitHub CI
+  reproduced fully green locally throughout (149/2 with a database); this was purely the Vercel
+  deployment check. Also removed the `db:push` script (it chained `drizzle-kit generate`, a
+  schema-drift footgun). Verified: the app's own Vercel preview built on the `dropwatch` landing
+  project is a preview alias only — production `usedropwatch.com` stays main-only and untouched.
+
+- 2026-09-02 — **`/security-check` for app scope: FAIL → fixed → PASS.** First run found exactly one
+  blocking hole: nothing rate-limited the three procedures that spend Anthropic/PriceAPI money per
+  call, behind open magic-link signup — one hostile account = an unbounded bill. Fixed at the root:
+  a per-user `usageCounters` table (RLS'd, migrations 0002+0003, applied to the provisioned
+  database), caps enforced before any paid call (200 LLM calls/day, 20 active watches, 1 manual
+  import run/hour), budget debited on attempts so failed parses can't loop free, body limit
+  50mb→1mb. Negative tests prove the attack now fails (capped caller → TOO_MANY_REQUESTS, paid call
+  never made) and run in CI. Scoped adversarial re-review: PASS — atomic increment-then-check has
+  zero overshoot for the LLM/cooldown caps; every paid-call site enumerated and gated. Everything
+  else in the full checklist held under live probing (RLS cross-tenant denials, session pinning,
+  input handling, secrets hygiene). Verdict + 10 recorded accepted risks:
+  `docs/engineering/04-security.md`. Suite now 149 passed | 2 skipped. All four ADRs plus the
+  security gate are done on the branch; remaining founder steps are in the draft-PR checklist.
+
+- 2026-09-01 — **ADR-4 + ADR-5 executed; the app now has zero Manus dependencies on any product
+  path.** Same branch/draft PR as ADR-2/3. **ADR-4:** `_core/llm.ts` is the official Anthropic SDK
+  (model `claude-opus-5`, `ANTHROPIC_MODEL` overrides); the per-call model-list round-trip is gone;
+  verdict fallbacks unchanged and now unit-tested. Removing the gateway exposed a masked test — the
+  stale-offer suppression assertion had only ever passed because the old gateway's model-list fetch
+  consumed the stubbed download; the test now asserts the trust layer's real contract
+  (log-but-never-alert). **ADR-5:** the Express app is extracted to `server/_core/app.ts` and served
+  both by the long-running local entry and by `app/api/index.ts` as a single Vercel function;
+  `app/vercel.json` carries rewrites, static SPA output, and the 6-hourly Vercel Cron that replaces
+  the deleted Manus heartbeat (`CRON_SECRET`-authenticated, refuses all callers when unset).
+  **Infra:** Vercel project `dropwatch-app` (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`) created, Root
+  Directory `app/`, no domains — and `dropwatch` verified untouched afterward (same domains,
+  deployment, and updatedAt). Suite: 141 passed | 2 skipped with a database; typecheck, server
+  build, and the exact Vercel buildCommand all clean. Remaining founder env setup before first
+  deploy: `DATABASE_URL` (after setting the `dropwatch_app` role password), `JWT_SECRET`,
+  `SUPABASE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_ID`, `CRON_SECRET`,
+  `ANTHROPIC_API_KEY`, `DATABASE_POOL_MAX=1`, plus Postmark/PriceAPI when those features turn on.
+
+- 2026-09-01 — **ADR-2 + ADR-3 executed on `claude/dropwatch-adr-migration` (draft PR); app database
+  provisioned.** The app is now Postgres + Supabase Auth in code, with a provisioned database:
+
+  - **ADR-2:** `app/` migrated MySQL→Postgres (drizzle pg-core, `postgres` driver, `mysql2` gone).
+    RLS is *enforcing*, not decorative: the app connects as the non-owner `dropwatch_app` role and
+    every query runs in a transaction asserting the caller's identity; the migrations carry the
+    policies. `watchEvents` has no UPDATE/DELETE grant — audit trail immutable at the database.
+    Proven with captured output: as `dropwatch_app`, an unfiltered `SELECT` under tenant A returns
+    only A's rows; a no-context query returns 0 rows; a cross-tenant insert fails with "new row
+    violates row-level security policy"; a service-context `UPDATE` on `watchEvents` fails with
+    "permission denied". These proofs are codified in `server/rls.integration.test.ts` and run in CI.
+  - **ADR-3:** Manus OAuth deleted (`oauth.ts`, `manusTypes.ts`, the cron-session path). Supabase
+    Auth magic-link login on the client; `POST /api/auth/session` verifies the Supabase access token
+    (JWKS, issuer+audience pinned) and mints the same first-party HS256 cookie as before —
+    `users.openId` now holds the Supabase auth user UUID. Scheduled imports authenticate via
+    `CRON_SECRET` (the Vercel Cron contract ADR-5 will use); the endpoint refuses everything when
+    the secret is unset.
+  - **CI:** MySQL service → Postgres 16; tests run as `dropwatch_app` so CI exercises RLS; the
+    fail-on-skipped-integration-suite guard is unchanged. Suite grew 112→132 passing with a DB
+    (119/15 without); typecheck and build clean.
+  - **Database provisioned** in Supabase project `gqezqgasuqqpnqiljsig` (see decision log for why
+    not a new project: free-tier 2-project cap). Both migrations applied, drizzle migration
+    tracking seeded, RLS smoke-verified remotely (no-context 0 rows / tenant sees own row only /
+    service sees all), Supabase security advisors clean for the app's objects after pinning
+    `search_path` on the helper functions. **Found and removed:** an undocumented DropWatch schema
+    prototype in that project (migrations `dropwatch_app_*`, 2026-08-30 — the day after the
+    architecture brief; tenant-a/b test fixtures only). Work outside the workflow leaves no trail;
+    recorded here so it has one.
+  - **Founder to-dos before the app can run anywhere:** set a password for `dropwatch_app`
+    (Supabase SQL editor: `ALTER ROLE dropwatch_app WITH LOGIN PASSWORD '<generated>'` — kept out
+    of this session on purpose) and, when deploying, the env vars in `app/.env.example`.
+    Remaining ADRs: ADR-4 (Anthropic) and ADR-5 (Vercel serverless + the app's own Vercel
+    project) are next on the same branch; then `/security-check` for app scope.
+  - Advisor findings NOT ours, surfaced for awareness: the contracts-app prototype sharing this
+    project has `email_campaigns`/`promo_codes` with RLS enabled but no policies, and a
+    SECURITY DEFINER function `rls_auto_enable()` executable by `anon` via PostgREST.
 
 - 2026-09-01 — **Pivot ratified; landing page rewritten to validate it; copy iteration spent.**
   Founder decisions, all four in one sitting: (1) ratify the trust-evidence pivot — recorded in
