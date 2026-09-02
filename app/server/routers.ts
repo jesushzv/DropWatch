@@ -1,15 +1,14 @@
 import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
-import { parse as parseCookie } from "cookie";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
-import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { ENV } from "./_core/env";
 import { PRICE_IMPORT_CRON, requestPriceImports } from "./priceImport";
 import { parseAlertRequest, writeDealVerdict } from "./watchAi";
+import { enforceImportRunCooldown, enforceLlmBudget, enforceWatchCap } from "./usageLimits";
 import { PRICE_SOURCE_IDS } from "./priceSources";
 
 const recordFields = z.object({
@@ -38,10 +37,6 @@ function retailerFromUrl(productUrl: string) {
   return hostname || "Online retailer";
 }
 
-function decodedSession(req: { headers: { cookie?: string } }) {
-  return parseCookie(req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
-}
-
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -64,6 +59,10 @@ export const appRouter = router({
     createFromRequest: protectedProcedure
       .input(z.object({ request: z.string().trim().min(4).max(1000) }))
       .mutation(async ({ ctx, input }) => {
+        // Both checks run before the Anthropic call: the watch cap gates row
+        // growth, the budget gates spend — including failed parse attempts.
+        await enforceWatchCap(ctx.user.id);
+        await enforceLlmBudget(ctx.user.id);
         try {
           const parsed = await parseAlertRequest(input.request);
           const fields = recordFields.parse({ originalRequest: input.request, ...parsed });
@@ -78,6 +77,7 @@ export const appRouter = router({
         }
       }),
     create: protectedProcedure.input(recordFields).mutation(async ({ ctx, input }) => {
+      await enforceWatchCap(ctx.user.id);
       const detail = await db.createWatchedRecord({ userId: ctx.user.id, ...input });
       if (!detail) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The watch was created but could not be loaded." });
       return detail;
@@ -112,6 +112,7 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const detail = await db.getWatchedRecordDetail(ctx.user.id, input.id);
         if (!detail) throw notFound();
+        await enforceLlmBudget(ctx.user.id);
         const historicalPrices = detail.prices.map(price => price.priceCents);
         const lowestPriceCents = Math.min(input.priceCents, ...historicalPrices);
         const dealVerdict = await writeDealVerdict({
@@ -131,28 +132,21 @@ export const appRouter = router({
     getSchedule: protectedProcedure.query(async ({ ctx }) => (await db.getPriceImportSchedule(ctx.user.id)) ?? null),
     requestNow: protectedProcedure.mutation(async ({ ctx }) => {
       if (!ENV.isProduction) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Publish DropWatch before requesting provider-backed imports." });
+      await enforceImportRunCooldown(ctx.user.id);
       return requestPriceImports({ ownerId: ctx.user.id, publicBaseUrl: publicBaseUrl(ctx.req) });
     }),
+    // Recurring imports are driven by one platform cron (Vercel Cron hits
+    // /api/scheduled/price-imports, ADR-5), which runs every schedule row
+    // that is enabled — so enabling/disabling is purely a database toggle.
     enableRecurring: protectedProcedure.mutation(async ({ ctx }) => {
       if (!ENV.isProduction) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Publish DropWatch before enabling recurring imports." });
-      const session = decodedSession(ctx.req);
       const existing = await db.getPriceImportSchedule(ctx.user.id);
-      if (existing?.scheduleCronTaskUid) {
-        await updateHeartbeatJob(existing.scheduleCronTaskUid, { enable: true }, session);
-        return db.setPriceImportScheduleEnabled(ctx.user.id, true);
-      }
-      const job = await createHeartbeatJob({
-        name: `dropwatch-imports-${ctx.user.id}`,
-        cron: PRICE_IMPORT_CRON,
-        path: "/api/scheduled/price-imports",
-        description: "Automatic US retailer price imports every six hours for DropWatch.",
-      }, session);
-      return db.createPriceImportSchedule({ ownerId: ctx.user.id, taskUid: job.taskUid, cronExpression: PRICE_IMPORT_CRON });
+      if (existing) return db.setPriceImportScheduleEnabled(ctx.user.id, true);
+      return db.createPriceImportSchedule({ ownerId: ctx.user.id, cronExpression: PRICE_IMPORT_CRON });
     }),
     disableRecurring: protectedProcedure.mutation(async ({ ctx }) => {
       const existing = await db.getPriceImportSchedule(ctx.user.id);
-      if (!existing?.scheduleCronTaskUid) throw new TRPCError({ code: "NOT_FOUND", message: "No recurring import schedule was found." });
-      await updateHeartbeatJob(existing.scheduleCronTaskUid, { enable: false }, decodedSession(ctx.req));
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "No recurring import schedule was found." });
       return db.setPriceImportScheduleEnabled(ctx.user.id, false);
     }),
   }),

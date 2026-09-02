@@ -10,6 +10,8 @@ vi.mock("./db", () => ({
   softDeleteWatchedRecord: vi.fn(),
   logPrice: vi.fn(),
   getPriceImportSchedule: vi.fn(),
+  incrementUsage: vi.fn(async () => 1),
+  countActiveWatchedRecords: vi.fn(async () => 0),
 }));
 
 vi.mock("./watchAi", () => ({

@@ -13,7 +13,7 @@ export function isProductionRuntime(nodeEnv: string | undefined) {
  * late and confusingly if unset: signing throws "Zero-length key is not
  * supported" on the first login rather than at boot.
  */
-const REQUIRED_IN_PRODUCTION = ["JWT_SECRET", "DATABASE_URL", "OAUTH_SERVER_URL", "VITE_APP_ID"] as const;
+const REQUIRED_IN_PRODUCTION = ["JWT_SECRET", "DATABASE_URL", "SUPABASE_URL", "VITE_APP_ID"] as const;
 
 export function missingRequiredEnv(env: NodeJS.ProcessEnv = process.env) {
   return REQUIRED_IN_PRODUCTION.filter(name => !env[name]);
@@ -38,7 +38,9 @@ export const ENV = {
   get appId() { return process.env.VITE_APP_ID ?? ""; },
   get cookieSecret() { return process.env.JWT_SECRET ?? ""; },
   get databaseUrl() { return process.env.DATABASE_URL ?? ""; },
-  get oAuthServerUrl() { return process.env.OAUTH_SERVER_URL ?? ""; },
+  get supabaseUrl() { return process.env.SUPABASE_URL ?? ""; },
+  get supabaseJwtSecret() { return process.env.SUPABASE_JWT_SECRET ?? ""; },
+  get cronSecret() { return process.env.CRON_SECRET ?? ""; },
   get ownerOpenId() { return process.env.OWNER_OPEN_ID ?? ""; },
   get isProduction() { return isProductionRuntime(process.env.NODE_ENV); },
   get forgeApiUrl() { return process.env.BUILT_IN_FORGE_API_URL ?? ""; },

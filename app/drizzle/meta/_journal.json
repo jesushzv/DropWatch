@@ -1,61 +1,33 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1787714006431,
-      "tag": "0000_flowery_white_tiger",
+      "version": "7",
+      "when": 1788287002466,
+      "tag": "0000_init_postgres",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "5",
-      "when": 1787714238690,
-      "tag": "0001_marvelous_rattler",
+      "version": "7",
+      "when": 1788287037811,
+      "tag": "0001_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 2,
-      "version": "5",
-      "when": 1787792034836,
-      "tag": "0002_numerous_fabian_cortez",
+      "version": "7",
+      "when": 1788302230390,
+      "tag": "0002_usage_counters",
       "breakpoints": true
     },
     {
       "idx": 3,
-      "version": "5",
-      "when": 1787855641869,
-      "tag": "0003_serious_tana_nile",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1787855708474,
-      "tag": "0004_early_pestilence",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1787855901816,
-      "tag": "0005_confused_black_widow",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1787863171649,
-      "tag": "0006_lonely_ironclad",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1787863808788,
-      "tag": "0007_clever_lily_hollister",
+      "version": "7",
+      "when": 1788302236457,
+      "tag": "0003_usage_counters_rls",
       "breakpoints": true
     }
   ]

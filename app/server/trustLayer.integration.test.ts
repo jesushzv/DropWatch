@@ -1,25 +1,35 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { users } from "../drizzle/schema";
-import { createPriceImportJob, createWatchedRecord, getDb, getWatchedRecordDetail, logPrice } from "./db";
+import { createPriceImportJob, createWatchedRecord, getWatchedRecordDetail, logPrice, withServiceContext } from "./db";
 import { processPriceApiWebhook } from "./priceImport";
 
 const integration = process.env.DATABASE_URL ? describe : describe.skip;
 const openId = `dropwatch-trust-${Date.now()}`;
 let userId: number | undefined;
 
+async function createTestUser(testOpenId: string, name: string) {
+  const inserted = await withServiceContext(tx =>
+    tx.insert(users).values({ openId: testOpenId, name, role: "user", lastSignedIn: new Date() }).returning({ id: users.id }),
+  );
+  return inserted[0].id;
+}
+
+async function deleteTestUser(id: number) {
+  await withServiceContext(async tx => {
+    await tx.delete(users).where(eq(users.id, id));
+  });
+}
+
 integration("persisted trust layer", () => {
   afterAll(async () => {
-    if (!userId) return;
-    const database = await getDb();
-    await database?.delete(users).where(eq(users.id, userId));
+    const uid = userId;
+    if (!uid) return;
+    await deleteTestUser(uid);
   });
 
   it("persists observation mode, ZIP context, alert basis, and normalized evidence", async () => {
-    const database = await getDb();
-    if (!database) throw new Error("Database is unavailable for integration testing.");
-    const inserted = await database.insert(users).values({ openId, name: "DropWatch Trust Test", role: "user", lastSignedIn: new Date() });
-    userId = Number(inserted[0].insertId);
+    userId = await createTestUser(openId, "DropWatch Trust Test");
     const detail = await createWatchedRecord({ userId, originalRequest: "Headphones under $200", productName: "Headphones", stores: [], thresholdCents: 20_000, alertBasis: "verified_total", destinationPostalCode: "94105", observationMode: true });
     if (!detail) throw new Error("Expected test watch to be created.");
     await logPrice({ userId, recordId: detail.record.id, productUrl: "https://example.com/headphones", store: "Example", priceCents: 18_000, dealVerdict: "Within target.", shippingCents: 1500, taxCents: 1755, estimatedTotalCents: 20255, currency: "USD", condition: "new", fulfillment: "retailer", availability: "in_stock", seller: "Example", destinationPostalCode: "94105", costConfidence: "verified", freshnessState: "fresh", observedAt: new Date(), evidenceJson: JSON.stringify({ shippingKnown: true, taxKnown: true }) });
@@ -31,10 +41,7 @@ integration("persisted trust layer", () => {
   });
 
   it("persists an observation event and suppresses stale and unverified alert paths", async () => {
-    const database = await getDb();
-    if (!database) throw new Error("Database is unavailable for integration testing.");
-    const inserted = await database.insert(users).values({ openId: `${openId}-pipeline`, name: "DropWatch Pipeline Test", role: "user", lastSignedIn: new Date() });
-    const pipelineUserId = Number(inserted[0].insertId);
+    const pipelineUserId = await createTestUser(`${openId}-pipeline`, "DropWatch Pipeline Test");
     const observation = await createWatchedRecord({ userId: pipelineUserId, originalRequest: "Headphones under $200", productName: "Observation headphones", stores: [], thresholdCents: 20_000, alertBasis: "item_price", observationMode: true });
     const stale = await createWatchedRecord({ userId: pipelineUserId, originalRequest: "Camera under $500", productName: "Stale camera", stores: [], thresholdCents: 50_000, alertBasis: "item_price" });
     if (!observation || !stale) throw new Error("Expected pipeline watches to be created.");
@@ -51,15 +58,23 @@ integration("persisted trust layer", () => {
     const observationDetail = await getWatchedRecordDetail(pipelineUserId, observation.record.id);
     const staleDetail = await getWatchedRecordDetail(pipelineUserId, stale.record.id);
     expect(observationDetail?.events.some(event => event.eventType === "email_skipped")).toBe(true);
-    expect(staleDetail?.prices).toHaveLength(0);
-    await database.delete(users).where(eq(users.id, pipelineUserId));
+    // The stale offer ($399.99, under the $500 target) is kept as graded
+    // history but must never alert: no trigger, no threshold_met, no email.
+    // (An earlier version asserted zero price entries, which only held because
+    // the Manus gateway's model-list fetch consumed the stubbed stale response
+    // before the download ran — the staleness filter itself was never
+    // exercised. These assertions test the real suppression contract in
+    // offerMeetsAlertBasis.)
+    expect(staleDetail?.prices).toHaveLength(1);
+    expect(staleDetail?.prices[0]).toMatchObject({ freshnessState: "stale" });
+    expect(staleDetail?.record.status).toBe("active");
+    expect(staleDetail?.events.some(event => event.eventType === "threshold_met")).toBe(false);
+    expect(staleDetail?.events.some(event => event.eventType.startsWith("email_"))).toBe(false);
+    await deleteTestUser(pipelineUserId);
   });
 
   it("applies item, estimated, and verified alert bases differently for partial landed cost", async () => {
-    const database = await getDb();
-    if (!database) throw new Error("Database is unavailable for integration testing.");
-    const inserted = await database.insert(users).values({ openId: `${openId}-basis`, name: "DropWatch Basis Test", role: "user", lastSignedIn: new Date() });
-    const basisUserId = Number(inserted[0].insertId);
+    const basisUserId = await createTestUser(`${openId}-basis`, "DropWatch Basis Test");
     const item = await createWatchedRecord({ userId: basisUserId, originalRequest: "Item price", productName: "Item basis", stores: [], thresholdCents: 20_000, alertBasis: "item_price" });
     const estimated = await createWatchedRecord({ userId: basisUserId, originalRequest: "Estimated total", productName: "Estimated basis", stores: [], thresholdCents: 20_000, alertBasis: "estimated_total" });
     const verified = await createWatchedRecord({ userId: basisUserId, originalRequest: "Verified total", productName: "Verified basis", stores: [], thresholdCents: 20_000, alertBasis: "verified_total" });
@@ -77,14 +92,11 @@ integration("persisted trust layer", () => {
     expect(verifiedDetail?.prices).toHaveLength(1);
     expect(verifiedDetail?.record.status).toBe("active");
     expect(verifiedDetail?.events.some(event => event.eventType === "threshold_met")).toBe(false);
-    await database.delete(users).where(eq(users.id, basisUserId));
+    await deleteTestUser(basisUserId);
   });
 
   it("qualifies all alert bases when provider supplies complete landed-cost evidence", async () => {
-    const database = await getDb();
-    if (!database) throw new Error("Database is unavailable for integration testing.");
-    const inserted = await database.insert(users).values({ openId: `${openId}-complete`, name: "DropWatch Complete Basis Test", role: "user", lastSignedIn: new Date() });
-    const completeUserId = Number(inserted[0].insertId);
+    const completeUserId = await createTestUser(`${openId}-complete`, "DropWatch Complete Basis Test");
     const bases = await Promise.all(["item_price", "estimated_total", "verified_total"].map((alertBasis, index) => createWatchedRecord({ userId: completeUserId, originalRequest: alertBasis, productName: `Complete basis ${index}`, stores: [], thresholdCents: 23_000, alertBasis: alertBasis as "item_price" | "estimated_total" | "verified_total" })));
     if (bases.some(record => !record)) throw new Error("Expected complete-basis watches to be created.");
     const jobIds = bases.map((_, index) => `complete-basis-${index}-${Date.now()}`);
@@ -98,6 +110,6 @@ integration("persisted trust layer", () => {
       expect(detail?.events.some(event => event.eventType === "threshold_met")).toBe(true);
       expect(detail?.prices[0]).toMatchObject({ estimatedTotalCents: 21249, costConfidence: "verified" });
     }
-    await database.delete(users).where(eq(users.id, completeUserId));
+    await deleteTestUser(completeUserId);
   });
 });

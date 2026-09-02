@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { users } from "../drizzle/schema";
-import { getDb, getNotificationPreferences, setPriceAlertEmailPreference, unsubscribePriceAlertEmails } from "./db";
+import { getNotificationPreferences, setPriceAlertEmailPreference, unsubscribePriceAlertEmails, withServiceContext } from "./db";
 
 const integration = process.env.DATABASE_URL ? describe : describe.skip;
 const openId = `dropwatch-preferences-${Date.now()}`;
@@ -9,16 +9,18 @@ let userId: number | undefined;
 
 integration("notification preference persistence", () => {
   afterAll(async () => {
-    if (!userId) return;
-    const database = await getDb();
-    await database?.delete(users).where(eq(users.id, userId));
+    const uid = userId;
+    if (!uid) return;
+    await withServiceContext(async tx => {
+      await tx.delete(users).where(eq(users.id, uid));
+    });
   });
 
   it("defaults to opt-in and persists preference updates through an opaque unsubscribe token", async () => {
-    const database = await getDb();
-    if (!database) throw new Error("Database is unavailable for integration testing.");
-    const inserted = await database.insert(users).values({ openId, name: "DropWatch Preference Test", role: "user", lastSignedIn: new Date() });
-    userId = Number(inserted[0].insertId);
+    const inserted = await withServiceContext(tx =>
+      tx.insert(users).values({ openId, name: "DropWatch Preference Test", role: "user", lastSignedIn: new Date() }).returning({ id: users.id }),
+    );
+    userId = inserted[0].id;
 
     const initial = await getNotificationPreferences(userId);
     expect(initial.priceAlertEmails).toBe(true);
