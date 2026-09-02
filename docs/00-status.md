@@ -5,7 +5,7 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-09-01
+- **Last updated:** 2026-09-02 (probe: launch pending; ADR-2/3/4/5 + app security gate done on branch)
 - **Next command:** **launch.** Every pre-ad check is closed with evidence as of 2026-09-02 05:57 UTC
   (see the founder queue). Run Meta ads per `marketing/ads/ads-kit.md` and post the share-kit links,
   every link `https://www.usedropwatch.com/?utm_source=…` — fix the Facebook post link, which has no
@@ -67,7 +67,7 @@ channels are running.
 | Build plan | — | | phases: 0/0 complete |
 | CI pipeline | SET UP | 2026-08-29 | `.github/workflows/ci.yml`: landing-page job (build + asserts root-relative asset base) and app job (typecheck, test, build + asserts vendor runtime stays out of the bundle). Runs a MySQL service so the six integration suites execute rather than skip — **112 passed / 2 skipped in CI**, vs 105/9 without a database — and fails the job if an integration suite skips, so a broken database cannot look green. Job timeouts and concurrency cancellation set. Added while reviewing PR #16; the repo had no CI before |
 | Review | RESOLVED | 2026-08-29 | Full review of PR #16 found it would have taken production down — verified on its own Vercel preview that `/` served the bundled Express server as text/plain and `/landing-page/` 404'd. Fixes in #17 (merged into #16, then #16 → main, commit 0c8ec66): landing restored to the root, app moved to `app/`, 6 security fixes, suite made hermetic (8 failures → 0), production HTML 368 kB → 826 B, initial JS 929 → 531 kB, CI added. Production re-verified after merge: landing page at `/`, `/privacy` 200, Meta Pixel and `dropwatch_leads` capture intact. Follow-up in PR #18 closed the coverage gaps: **50 → 112 tests**, adding router authorization coverage (every protected procedure rejects anonymous callers; row ownership comes from the session, never from input) and covering the six security fixes. Each new suite was mutation-tested. Still owed: `/security-check`, and eslint/prettier which have no CI gate |
-| Security | — | | Landing-scope only: RLS insert-only on `dropwatch_leads` verified 2026-08-22. App scope not yet gated — `/security-check` is owed before `app/` ships. Fixed while reviewing PR #16: unauthenticated storage proxy, non-expiring provider callback signature, SameSite=None session cookie, missing appId check, test-auth reachable with NODE_ENV unset, state-changing GET unsubscribe |
+| Security | PASS (app scope) | 2026-09-02 | `/security-check` ran for app scope on `claude/dropwatch-adr-migration`: FAIL on one blocking finding (no rate limiting on the paid-API procedures behind open self-signup) → fixed with per-user usage caps + negative tests → scoped adversarial re-review PASS. Full record: `docs/engineering/04-security.md`. Landing scope unchanged (RLS insert-only on `dropwatch_leads`, 2026-08-22). Accepted risks listed in the artifact — the two founder-actionable ones: confirm Supabase Auth rate limits before launch, and execute ADR-7 (dead vendor surface) soon |
 | Design review | — | | done / skipped-on-record |
 | Perf audit | — | | done / skipped-on-record |
 | Legal (first deploy) | PASS | 2026-08-24 | Landing scope: privacy policy + terms live on production (`/privacy`, `/terms`, both HTTP 200) and footer-linked. Consent banner NOT required — session replay verified off (0 `$snapshot` events in PostHog, 2026-08-23). Stripe Tax N/A: nothing is sold. `privacy@usedropwatch.com` forwarding via ImprovMX (MX + SPF TXT confirmed live in DNS 2026-08-24); founder confirmed a test email sent from a separate account was received. |
@@ -203,6 +203,20 @@ channels are running.
   test signup was submitted on production, so the Meta `Lead` event is unproven. Both are recorded
   as open in the founder queue. The Facebook click is founder traffic and is discounted from the
   probe.
+
+- 2026-09-02 — **`/security-check` for app scope: FAIL → fixed → PASS.** First run found exactly one
+  blocking hole: nothing rate-limited the three procedures that spend Anthropic/PriceAPI money per
+  call, behind open magic-link signup — one hostile account = an unbounded bill. Fixed at the root:
+  a per-user `usageCounters` table (RLS'd, migrations 0002+0003, applied to the provisioned
+  database), caps enforced before any paid call (200 LLM calls/day, 20 active watches, 1 manual
+  import run/hour), budget debited on attempts so failed parses can't loop free, body limit
+  50mb→1mb. Negative tests prove the attack now fails (capped caller → TOO_MANY_REQUESTS, paid call
+  never made) and run in CI. Scoped adversarial re-review: PASS — atomic increment-then-check has
+  zero overshoot for the LLM/cooldown caps; every paid-call site enumerated and gated. Everything
+  else in the full checklist held under live probing (RLS cross-tenant denials, session pinning,
+  input handling, secrets hygiene). Verdict + 10 recorded accepted risks:
+  `docs/engineering/04-security.md`. Suite now 149 passed | 2 skipped. All four ADRs plus the
+  security gate are done on the branch; remaining founder steps are in the draft-PR checklist.
 
 - 2026-09-01 — **ADR-4 + ADR-5 executed; the app now has zero Manus dependencies on any product
   path.** Same branch/draft PR as ADR-2/3. **ADR-4:** `_core/llm.ts` is the official Anthropic SDK
