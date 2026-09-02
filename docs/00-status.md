@@ -92,7 +92,12 @@ channels are running.
   hosts sent events before analytics was host-gated on 2026-08-23. Neither is DropWatch traffic.
 - **Founder-traffic discount (2026-09-02):** exclude the person behind the 2026-09-02 05:57 UTC
   `utm_source=test` visit and signup (Supabase row `6492cc2e…`), and the 2026-09-01 18:02 UTC
-  Facebook click, from every read. Treat `utm_source = test` as founder QA always.
+  Facebook click, from every read. Treat any `utm_source` that **starts with** `test` as founder QA
+  always — matched with `LIKE 'test%'`, not equality: four production pageviews on 2026-09-02
+  06:00–07:15 UTC arrived as `utm_source = "test\`"` with a trailing backtick, copied from a link
+  that was wrapped in Markdown code formatting. **Ad and post links must be pasted from plain text,
+  never from a chat message's code span** — a stray character turns `facebook` into `facebook\`` and
+  splits the channel read in two.
 - **Denominator floor:** read nothing before 300 unique visitors overall; read a channel only
   after it has 100 visitors (utm_source). **Count from 2026-08-23 forward** — the ~22 pageviews
   before that date are founder QA from localhost and preview builds. Analytics is now gated to
@@ -152,6 +157,12 @@ channels are running.
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-02 — **Discount rule widened after a malformed test tag.** Four production-host pageviews
+  between 06:00 and 07:15 UTC carried `utm_source = "test\`"` (trailing backtick) — the test link
+  copied with its Markdown code delimiter. Founder QA, excluded; the rule now matches `test%`
+  rather than exact `test`. Recorded as a launch hazard: every ad and post link must be pasted from
+  plain text so the channel tag is exact. No non-founder tagged traffic yet.
 
 - 2026-09-02 — **Live-host signup path proven; all pre-ad checks closed.** Founder clicked
   `https://www.usedropwatch.com/?utm_source=test` and submitted a signup. Captured: PostHog
