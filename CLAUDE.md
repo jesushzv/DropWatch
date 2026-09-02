@@ -38,9 +38,13 @@ Defaults in `.claude/references/stack.md` (Next.js + TypeScript, Supabase with R
   the page is a static lead-capture probe; revisit when the MVP build starts.
 - **Leads storage:** Supabase project `business-helper` (dfyoavffxzujvxvnsizi), table
   `dropwatch_leads`, insert-only RLS for anon; migration in `supabase/migrations/`.
-- **Hosting:** Vercel project `dropwatch` (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`) is the **only**
-  project that builds or serves this repo (root directory = repo root). It holds both
-  `usedropwatch.com` and `www.usedropwatch.com`. `VITE_META_PIXEL_ID` is set on it, and Vite
+- **Hosting (landing page):** Vercel project `dropwatch` (`prj_l7DMfbbVAMUvlvB3rQArQjn76bCV`)
+  builds the repo root and is the **only** project that serves the landing page. It holds both
+  `usedropwatch.com` and `www.usedropwatch.com`.
+- **Hosting (app):** Vercel project `dropwatch-app` (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`, root
+  directory `app`, created 2026-09-01 by the ADR-5 work) builds `app/` only. It must **never** hold
+  `usedropwatch.com` or `www` — the landing hosts stay on `dropwatch`. Named here per the
+  2026-08-24 decision that any second project is declared, not discovered. `VITE_META_PIXEL_ID` is set on it, and Vite
   inlines `VITE_*` vars at build time, so a deployment from any other project silently ships a
   pixel-less bundle. **Before trusting a production URL, check which project serves it** — the
   duplicate-project trap in the 2026-08-24 entry of `docs/knowledge/decisions.md` cost a
