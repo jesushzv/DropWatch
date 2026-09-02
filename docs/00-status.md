@@ -21,11 +21,13 @@
 
 - [x] ~~Send an email to `privacy@usedropwatch.com` from a separate account and confirm it arrives.~~
       Founder-reported done 2026-09-01 (not independently verifiable from a session).
-- [~] Meta Events Manager → Test events. Founder-reported done 2026-09-01. **Data check:** no
+- [ ] Meta Events Manager → Test events. Founder-reported done 2026-09-01. **Data check:** no
       `signup_submitted` in PostHog and no row in `dropwatch_leads` on 2026-09-01, so no test signup
-      was submitted on a production host — `PageView` may be confirmed, but `Lead` fires only from a
-      real submission and is **unproven**. One real test signup on `www.usedropwatch.com` closes it;
-      record the time so it is discounted from the probe.
+      was submitted on a production host. **Sharper on 2026-09-02:** PostHog shows the only
+      `signup_submitted` ever captured (2026-08-23 20:36) came from the preview host
+      `dropwatch-ktd4mjmmh-…vercel.app`, not production — so the production signup-analytics path
+      and the Meta `Lead` event have **never been exercised on the live host**. One real test signup
+      on `www.usedropwatch.com` closes both; record the time so it is discounted from the probe.
 - [x] ~~Fill out the Facebook page: profile, cover, About, 1–2 organic posts.~~ Founder-reported done
       2026-09-01. Corroborated: a pageview at 18:02 UTC arrived from `l.facebook.com` carrying an
       `fbclid` — a link on the page is live and clicks through.
@@ -61,7 +63,7 @@ channels are running.
 
 | Gate | Verdict | Date | Notes |
 |---|---|---|---|
-| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-01 the probe is starved:** 102 unique visitors, 0 non-founder signups, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry. **Copy iteration spent 2026-09-01 (Path B, pivoted promise)** — see Waivers |
+| Validation | PENDING PROBE | 2026-09-01 | Landing page live (Vercel preview; production on merge). Probe = founding-user email capture to Supabase `dropwatch_leads`; denominator + payment-intent via PostHog (pageviews by utm_source, `signup_submitted` by source/tier, `tier_click`). Thresholds below — COMMITTED, founder approved 2026-08-22. **As of 2026-09-02 the probe is starved:** 88 unique visitors on production hosts (the 102 reported on 2026-09-01 included 13 pageviews from `businesshelper.app`, which shares the PostHog project — see the host filter below), 0 signups and 0 tier clicks on production, 0 tagged pageviews — no channel has run yet. See the 2026-09-01 log entry. **Copy iteration spent 2026-09-01 (Path B, pivoted promise)** — see Waivers |
 | PRD | — | | brief covers scope; formalize with `/prd` post-GO. **Now an input gap:** the architecture brief had to be written against `00-brief.md` because `docs/product/02-prd.md` does not exist |
 | Positioning | — | | brief covers positioning; formalize post-GO |
 | Architecture | DONE | 2026-08-29 | `docs/engineering/01-architecture.md`. Verdict: keep the app as the MVP, do not rebuild (ADR-1), conditional on four cuts — Supabase Postgres + RLS (ADR-2), Supabase Auth (ADR-3), Anthropic direct (ADR-4), delete dead vendor surface (ADR-7). Hosting: Vercel serverless (ADR-5). MVP ships manual price logging only; PriceAPI imports built but disabled (ADR-6). **Written against `00-brief.md` — no PRD exists.** Brief only; nothing implemented, and nothing should be until the validation gate resolves |
@@ -87,6 +89,10 @@ channels are running.
 > **payment intent** = share of signups arriving through a pricing-tier button (`tier` set).
 > Free-email signups alone are NOT demand evidence — the tier split is the demand read.
 
+- **Host filter (added 2026-09-02):** every read filters `$host IN ('www.usedropwatch.com',
+  'usedropwatch.com', 'dropwatch-jesushzvs-projects.vercel.app')`. The PostHog project token is
+  shared with `businesshelper.app`, whose pageviews land in the same project, and Vercel preview
+  hosts sent events before analytics was host-gated on 2026-08-23. Neither is DropWatch traffic.
 - **Denominator floor:** read nothing before 300 unique visitors overall; read a channel only
   after it has 100 visitors (utm_source). **Count from 2026-08-23 forward** — the ~22 pageviews
   before that date are founder QA from localhost and preview builds. Analytics is now gated to
@@ -146,6 +152,20 @@ channels are running.
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-02 — **Probe denominator was contaminated; corrected, and a host filter is now part of the
+  read rule.** A pageview from `businesshelper.app` at 03:20 UTC surfaced the fact that the PostHog
+  project token is shared with another product. Pageviews since 2026-08-23 by host: `www` 78,
+  apex 11, production vercel.app alias 3 → **92 pageviews / 88 uniques of real DropWatch traffic**;
+  `businesshelper.app` 13 (not DropWatch); preview host `dropwatch-ktd4mjmmh-…vercel.app` 2 (founder
+  QA before host-gating shipped). The 2026-09-01 read of 102 uniques included the 13 foreign
+  pageviews; corrected figure is 88. Second finding from the same breakdown: the one
+  `signup_submitted` and all three `tier_click` events in PostHog came from that preview host, so the
+  2026-08-23 "verified on production" log entry was half right — the Supabase write was on
+  production, but the PostHog capture was from a preview build. **No signup or tier click has ever
+  been captured from a production host.** The open founder check (one real test signup on `www`)
+  is therefore the first exercise of the live signup-analytics and Meta `Lead` paths, not a
+  formality. Thresholds unchanged; the host filter is a read rule, not a metric change.
 
 - 2026-09-01 — **Pivoted landing page is live; pre-ad checks reconciled against the data.** PR #19
   merged at 20:56 UTC (`3bd0c75`); Vercel production deployment `dpl_8R3ktFmQ6HhaKY6mXUnJndeKqZaK`
