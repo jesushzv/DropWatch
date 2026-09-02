@@ -153,6 +153,12 @@ channels are running.
 
 <!-- One dated line per meaningful state change, newest first. -->
 
+- 2026-09-02 — **Second Vercel project exists and is declared.** `dropwatch-app`
+  (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`, root directory `app`) was created 2026-09-01 ~22:23 UTC by the
+  ADR session for ADR-5. Verified from the Vercel API: its domains are only its own `vercel.app`
+  hosts; `usedropwatch.com` and `www` remain solely on `dropwatch`. The probe is unaffected. Named in
+  `CLAUDE.md` per the 2026-08-24 decision, so it cannot be mistaken for the duplicate-project trap.
+
 - 2026-09-02 — **Probe denominator was contaminated; corrected, and a host filter is now part of the
   read rule.** A pageview from `businesshelper.app` at 03:20 UTC surfaced the fact that the PostHog
   project token is shared with another product. Pageviews since 2026-08-23 by host: `www` 78,
