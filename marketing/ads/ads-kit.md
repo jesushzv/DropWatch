@@ -5,18 +5,20 @@ Everything below is written to be pasted directly into Meta. Destination for eve
 the production page with the paid-channel UTM (never the bare URL — the probe reads channels
 separately, and paid must not blend with organic).
 
-- Facebook ads → `https://usedropwatch.com/?utm_source=fb-ads&utm_medium=paid&utm_campaign=validation`
-- Instagram ads → `https://usedropwatch.com/?utm_source=ig-ads&utm_medium=paid&utm_campaign=validation`
-- Organic page posts → `?utm_source=facebook` / `?utm_source=instagram`
+- Facebook ads → `https://www.usedropwatch.com/?utm_source=fb-ads&utm_medium=paid&utm_campaign=validation`
+- Instagram ads → `https://www.usedropwatch.com/?utm_source=ig-ads&utm_medium=paid&utm_campaign=validation`
+- Organic page posts → `https://www.usedropwatch.com/?utm_source=facebook` / `?utm_source=instagram`
+- Always `www` (the apex 308-redirects and costs a hop), and always pasted from plain text — a
+  link copied out of a chat code span once arrived as `utm_source=test\`` with a stray backtick.
 
 ## Page setup
 
-- **Name:** DropWatch · **Handle:** @getdropwatch (fallbacks: @dropwatchapp, @usedropwatch)
+- **Name:** DropWatch · **Handle:** @usedropwatch (matches the domain; @getdropwatch has none)
 - **Category:** Product/Service (or App Page)
 - **Profile picture:** `out/profile-1080.png` · **FB cover:** `out/cover-facebook-1640x624.png`
 - **Bio / short description (IG, ≤150 chars):**
-  "One plain-English price alert. Zero noise. Get pinged the second your price hits — never a
-  deal blast. Early access + 3 months of Pro free ↓"
+  "One plain-English price alert. Zero noise. One message when your price really hits — delivered
+  price, new, in stock. Early access + 3 months of Pro free ↓"
 - **About (FB):**
   "DropWatch watches one exact thing at one exact price — 'Sony XM5s under $250, new, delivered'
   — and only speaks when it really drops: delivered price, condition, in stock. No feed, no
