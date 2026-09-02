@@ -62,9 +62,11 @@ Directory `app/`, configured by `vercel.json` in this directory:
 - the SPA is built by `vite build` and served statically from `dist/public`;
 - every dynamic route is one serverless function, `api/index.ts`, which
   serves the same Express app the local entry runs (`server/_core/app.ts`);
-- Vercel Cron calls `GET /api/scheduled/price-imports` every six hours with
-  `Authorization: Bearer CRON_SECRET`; the route refuses everything when the
-  secret is unset;
+- Vercel Cron calls `GET /api/scheduled/price-imports` once daily (08:00 UTC)
+  with `Authorization: Bearer CRON_SECRET`; the route refuses everything when
+  the secret is unset. Daily is the Hobby-plan cap — the product spec's
+  six-hourly cadence needs Vercel Pro, and imports stay disabled for the MVP
+  (ADR-6) so the cadence is inert at launch;
 - set `DATABASE_POOL_MAX=1` and point `DATABASE_URL` at Supabase's
   transaction pooler (port 6543) — the driver already runs `prepare:false`.
 

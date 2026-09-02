@@ -204,6 +204,18 @@ channels are running.
   as open in the founder queue. The Facebook click is founder traffic and is discounted from the
   probe.
 
+- 2026-09-02 — **PR #23 check fix: Vercel cron cadence dropped to daily (Hobby-plan cap).** The
+  `dropwatch-app` deployment failed because `app/vercel.json` declared a six-hourly cron
+  (`0 */6 * * *`) and the Vercel account is on Hobby, which allows only once-daily crons — my branch
+  is the first to add `app/vercel.json`, so it was the first to hit it. Changed the platform cron and
+  `PRICE_IMPORT_CRON` to `0 8 * * *` (daily); flagged as an ADR-5 deviation in `decisions.md`. No
+  product impact: ADR-6 keeps imports disabled for the MVP, so the cron does nothing at launch, and
+  the six-hourly cadence in the product spec is restored the day the account moves to Pro. GitHub CI
+  reproduced fully green locally throughout (149/2 with a database); this was purely the Vercel
+  deployment check. Also removed the `db:push` script (it chained `drizzle-kit generate`, a
+  schema-drift footgun). Verified: the app's own Vercel preview built on the `dropwatch` landing
+  project is a preview alias only — production `usedropwatch.com` stays main-only and untouched.
+
 - 2026-09-02 — **`/security-check` for app scope: FAIL → fixed → PASS.** First run found exactly one
   blocking hole: nothing rate-limited the three procedures that spend Anthropic/PriceAPI money per
   call, behind open magic-link signup — one hostile account = an unbounded bill. Fixed at the root:

@@ -6,8 +6,11 @@ import { PriceSourceId, sourceLabel } from "./priceSources";
 import { writeDealVerdict } from "./watchAi";
 import { normalizeOffer, offerMeetsAlertBasis, NormalizedOffer } from "./trustLayer";
 
-// 5-field cron, matching the Vercel Cron entry in vercel.json (ADR-5).
-export const PRICE_IMPORT_CRON = "0 */6 * * *";
+// 5-field cron, matching the Vercel Cron entry in vercel.json (ADR-5). Daily
+// at 08:00 UTC: the Vercel Hobby plan caps cron jobs at once per day, so the
+// product spec's six-hourly cadence needs Vercel Pro. Inert at launch anyway —
+// ADR-6 keeps imports disabled for the MVP.
+export const PRICE_IMPORT_CRON = "0 8 * * *";
 export const PRICE_API_MARKET = "us";
 
 type UnknownRecord = Record<string, unknown>;
