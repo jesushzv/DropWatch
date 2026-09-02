@@ -6,11 +6,11 @@
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
 - **Last updated:** 2026-09-01
-- **Next command:** launch. The pivoted page is live (PR #19 merged 2026-09-01 20:56 UTC, production
-  READY). Two founder checks are still open on the data — the `?utm_source=test` click has not reached
-  PostHog, and no test signup has fired `Lead`/`signup_submitted` on production — close both, then run
-  Meta ads per `marketing/ads/ads-kit.md` and post the share-kit links with `?utm_source=` tags →
-  `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12)
+- **Next command:** **launch.** Every pre-ad check is closed with evidence as of 2026-09-02 05:57 UTC
+  (see the founder queue). Run Meta ads per `marketing/ads/ads-kit.md` and post the share-kit links,
+  every link `https://www.usedropwatch.com/?utm_source=…` — fix the Facebook post link, which has no
+  tag → `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12; ~210
+  more production-host visitors needed for the 300 floor)
 
 ## Founder queue — 2026-09-01
 
@@ -21,23 +21,20 @@
 
 - [x] ~~Send an email to `privacy@usedropwatch.com` from a separate account and confirm it arrives.~~
       Founder-reported done 2026-09-01 (not independently verifiable from a session).
-- [ ] Meta Events Manager → Test events. Founder-reported done 2026-09-01. **Data check:** no
-      `signup_submitted` in PostHog and no row in `dropwatch_leads` on 2026-09-01, so no test signup
-      was submitted on a production host. **Sharper on 2026-09-02:** PostHog shows the only
-      `signup_submitted` ever captured (2026-08-23 20:36) came from the preview host
-      `dropwatch-ktd4mjmmh-…vercel.app`, not production — so the production signup-analytics path
-      and the Meta `Lead` event have **never been exercised on the live host**. One real test signup
-      on `www.usedropwatch.com` closes both; record the time so it is discounted from the probe.
+- [x] ~~Meta Events Manager → Test events.~~ **Closed 2026-09-02 05:57 UTC with captured evidence.**
+      PostHog: `signup_submitted` at 05:57:34 on `www.usedropwatch.com`, placement `hero`,
+      `utm_source = test` carried on the event. Supabase `dropwatch_leads`: row `6492cc2e…` at
+      05:57:33, source `hero`. Same second, both stores — the first signup ever captured from a
+      production host. The Meta `Lead` call sits between those two in `CaptureForm` and ran with
+      them; Meta's receipt is visible only in Events Manager (founder-side).
 - [x] ~~Fill out the Facebook page: profile, cover, About, 1–2 organic posts.~~ Founder-reported done
       2026-09-01. Corroborated: a pageview at 18:02 UTC arrived from `l.facebook.com` carrying an
       `fbclid` — a link on the page is live and clicks through.
-- [ ] Click a link of the form `https://www.usedropwatch.com/?utm_source=test`, then confirm
-      PostHog shows `utm_source = test` on that pageview. Founder-reported done 2026-09-01, but
-      **PostHog has no pageview with `utm_source = test`** — the only pageview since 17:00 UTC is the
-      Facebook click above, which carried `fbclid` and no `utm_source`. Likely causes: the click was
-      on a preview/localhost host (gated out of analytics by design), an ad blocker, or the tag was
-      not on the link. Still open. Note the Facebook click *did* keep its query string on `www`, which
-      is partial evidence the path works; the apex→`www` 308 is still unexercised.
+- [x] ~~Click `https://www.usedropwatch.com/?utm_source=test` and confirm PostHog shows it.~~
+      **Closed 2026-09-02 05:57 UTC.** `$pageview` at 05:57:19 on `www` with `utm_source = test`;
+      the tag also rode through to the `signup_submitted` event 15 s later, so channel attribution
+      on signups works. Not exercised: the apex→`www` 308 (the click went straight to `www`) — use
+      `www` links and it never matters.
 - [x] ~~Merge PR #19.~~ Merged 2026-09-01 20:56 UTC (commit `3bd0c75`). Production deployment
       `dpl_8R3ktFmQ6HhaKY6mXUnJndeKqZaK` READY on the `dropwatch` project — the pivoted page is live.
 - [ ] Ad and post links use **`https://www.usedropwatch.com/?utm_source=…`** with the `www` and a
@@ -93,6 +90,14 @@ channels are running.
   'usedropwatch.com', 'dropwatch-jesushzvs-projects.vercel.app')`. The PostHog project token is
   shared with `businesshelper.app`, whose pageviews land in the same project, and Vercel preview
   hosts sent events before analytics was host-gated on 2026-08-23. Neither is DropWatch traffic.
+- **Founder-traffic discount (2026-09-02):** exclude the person behind the 2026-09-02 05:57 UTC
+  `utm_source=test` visit and signup (Supabase row `6492cc2e…`), and the 2026-09-01 18:02 UTC
+  Facebook click, from every read. Treat any `utm_source` that **starts with** `test` as founder QA
+  always — matched with `LIKE 'test%'`, not equality: four production pageviews on 2026-09-02
+  06:00–07:15 UTC arrived as `utm_source = "test\`"` with a trailing backtick, copied from a link
+  that was wrapped in Markdown code formatting. **Ad and post links must be pasted from plain text,
+  never from a chat message's code span** — a stray character turns `facebook` into `facebook\`` and
+  splits the channel read in two.
 - **Denominator floor:** read nothing before 300 unique visitors overall; read a channel only
   after it has 100 visitors (utm_source). **Count from 2026-08-23 forward** — the ~22 pageviews
   before that date are founder QA from localhost and preview builds. Analytics is now gated to
@@ -152,6 +157,21 @@ channels are running.
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-02 — **Discount rule widened after a malformed test tag.** Four production-host pageviews
+  between 06:00 and 07:15 UTC carried `utm_source = "test\`"` (trailing backtick) — the test link
+  copied with its Markdown code delimiter. Founder QA, excluded; the rule now matches `test%`
+  rather than exact `test`. Recorded as a launch hazard: every ad and post link must be pasted from
+  plain text so the channel tag is exact. No non-founder tagged traffic yet.
+
+- 2026-09-02 — **Live-host signup path proven; all pre-ad checks closed.** Founder clicked
+  `https://www.usedropwatch.com/?utm_source=test` and submitted a signup. Captured: PostHog
+  `$pageview` 05:57:19 (`www`, `utm_source=test`), `signup_submitted` 05:57:34 (`www`, placement
+  `hero`, `utm_source=test` on the event), Supabase row `6492cc2e…` 05:57:33 (`hero`). First signup
+  ever recorded from a production host; the tag survives on `www` and propagates to the signup
+  event. Meta `Lead` runs in the same code path between the two captured calls. Founder queue: every
+  pre-ad item closed. Next command: launch. This visit and signup are founder QA and are excluded
+  from the probe by the discount rule in the thresholds block.
 
 - 2026-09-02 — **Second Vercel project exists and is declared.** `dropwatch-app`
   (`prj_I8YvLVlj4BL8GPFWliTzqaq65xjR`, root directory `app`) was created 2026-09-01 ~22:23 UTC by the
