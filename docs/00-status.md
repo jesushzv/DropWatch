@@ -5,12 +5,15 @@
 - **Project:** DropWatch — plain-English price-drop alerts, zero noise
 - **Idea file:** `docs/product/00-brief.md` (external validation brief, supplied complete by the founder)
 - **Stage:** Validate
-- **Last updated:** 2026-09-02 (probe: launch pending; ADR-2/3/4/5 + app security gate done on branch)
-- **Next command:** **launch.** Every pre-ad check is closed with evidence as of 2026-09-02 05:57 UTC
-  (see the founder queue). Run Meta ads per `marketing/ads/ads-kit.md` and post the share-kit links,
-  every link `https://www.usedropwatch.com/?utm_source=…` — fix the Facebook post link, which has no
-  tag → `/validate-idea` converts the probe when the thresholds resolve (decide by 2026-09-12; ~210
-  more production-host visitors needed for the 300 floor)
+- **Last updated:** 2026-09-02 (probe: traffic rollout started; ADR-2/3/4/5 + app security gate
+  merged to main in PR #23)
+- **Next command:** **launch — rolling out per `marketing/launch-rollout.md`** (2026-09-02). Day 0:
+  fix the Facebook post link, build the Meta Traffic campaign from `marketing/ads/campaign-setup.md`,
+  post X/LinkedIn + DMs from `marketing/share-kit.md`. Day 1+: community posts. A daily 14:00 UTC
+  routine reports channel counts. Stop spend 2026-09-12 → `/validate-idea` reads the thresholds with
+  the host filter and founder-traffic discount applied (~210 more production-host visitors needed
+  for the 300 floor). App side: PR #23's four founder steps before first deploy are listed in that
+  PR; not on the probe's critical path.
 
 ## Founder queue — 2026-09-01
 
@@ -157,6 +160,17 @@ channels are running.
 ## Log
 
 <!-- One dated line per meaningful state change, newest first. -->
+
+- 2026-09-02 — **Traffic rollout written and started.** Founder asked whether to boost the existing
+  Facebook posts; answer recorded in `marketing/launch-rollout.md`: no — boosts optimise for
+  engagement not clicks, blend paid into the organic `facebook` channel, and the existing post link
+  carries no tag. Plan: Meta Traffic campaign per the ads kit ($10/day, cap $100, four creatives)
+  in parallel with share-kit community posts and personal-network DMs; organic expected to lead.
+  Fixed before rollout: ads-kit destination links moved from the apex to `www`; IG bio and the
+  share kit rewritten for the pivot (`marketing/share-kit.md` supersedes the pre-pivot kit in
+  `00-brief.md`, which still said "Amazon or Best Buy" and "the second it drops"); page handle set
+  to `@usedropwatch`. A daily 14:00 UTC routine reads PostHog and reports per-channel counts with
+  founder traffic excluded — counts only, no threshold verdict before the floor.
 
 - 2026-09-02 — **Discount rule widened after a malformed test tag.** Four production-host pageviews
   between 06:00 and 07:15 UTC carried `utm_source = "test\`"` (trailing backtick) — the test link
