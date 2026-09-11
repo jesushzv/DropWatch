@@ -1,0 +1,88 @@
+<!--
+  DropWatch — branded Magic Link email.
+  Paste the body below into Supabase → Authentication → Email Templates → "Magic Link".
+  Keep the {{ .ConfirmationURL }} token exactly as-is — Supabase fills it in per email.
+  Suggested Subject: Your DropWatch sign-in link
+-->
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:0;background:#f1ece4;">
+    <!-- preheader (hidden preview text) -->
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+      Tap to finish signing in to DropWatch. This link expires in about an hour.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1ece4;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                 style="max-width:480px;background:#fbfaf7;border:1px solid #e7e2d8;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="padding:40px 40px 8px 40px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                <!-- brand mark -->
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="width:44px;height:44px;background:#c0562b;border-radius:9px;text-align:center;vertical-align:middle;">
+                      <img src="https://www.usedropwatch.com/logo.svg" width="20" height="20" alt=""
+                           style="display:inline-block;vertical-align:middle;filter:brightness(0) invert(1);" />
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:18px 0 0 0;font-size:12px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8a827a;">
+                  DropWatch
+                </p>
+                <h1 style="margin:8px 0 0 0;font-family:'Sora','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;line-height:1.2;font-weight:700;color:#26221c;">
+                  Your sign-in link
+                </h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 0 40px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                <p style="margin:0;font-size:15px;line-height:1.6;color:#5f584f;">
+                  Tap the button below to finish signing in. No password needed — the link
+                  signs you straight in.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 40px 8px 40px;">
+                <!-- bulletproof button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                  <tr>
+                    <td align="center" bgcolor="#c0562b" style="border-radius:9px;">
+                      <a href="{{ .ConfirmationURL }}"
+                         style="display:block;padding:15px 24px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:9px;">
+                        Sign in to DropWatch
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 40px 0 40px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                <p style="margin:0;font-size:13px;line-height:1.6;color:#8a827a;">
+                  Or paste this link into your browser:
+                </p>
+                <p style="margin:6px 0 0 0;font-size:13px;line-height:1.5;word-break:break-all;">
+                  <a href="{{ .ConfirmationURL }}" style="color:#c0562b;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 40px 40px 40px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                <hr style="border:none;border-top:1px solid #e7e2d8;margin:0 0 18px 0;" />
+                <p style="margin:0;font-size:12px;line-height:1.6;color:#a39b91;">
+                  This link expires in about an hour and can be used once. If you didn't
+                  request it, you can safely ignore this email — no one can sign in without it.
+                </p>
+                <p style="margin:14px 0 0 0;font-size:12px;line-height:1.6;color:#a39b91;">
+                  DropWatch · Precise price signals · <a href="https://www.usedropwatch.com" style="color:#a39b91;text-decoration:underline;">usedropwatch.com</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
